@@ -359,6 +359,7 @@ NEURO: SEM DÉFICITS FOCAIS.</textarea>
     <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg">
   </audio>
 
+<script>
 /* =========================
    STATE / STORAGE
 ========================= */
@@ -1146,25 +1147,24 @@ render();
 // Atualiza countdown/atraso em tempo real
 setInterval(render, 1000);
 
-
 /* =========================
    SUPABASE CONFIG
 ========================= */
 
-const SUPABASE_URL = "sb_publishable_NeVuFb5qFM0b4hPkmVpbIg_BjF0GZzd";
-const SUPABASE_KEY = "sb_secret_E5tSQmqv_W9tjzdaccvBxQ_QuHXb22V";
+const SUPABASE_URL = "SUA_URL_AQUI";
+const SUPABASE_KEY = "SUA_ANON_PUBLIC_KEY_AQUI";
 
 const supabase = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
+
 /* =========================
    STATE
 ========================= */
 
 let pacientes = [];
 let editingId = null;
-
 const alarmTimers = {};
 let blinkInterval = null;
 let realtimeChannel = null;
@@ -1175,14 +1175,15 @@ function nowISO(){ return new Date().toISOString(); }
 function hhmm(d){ return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}); }
 
 /* =========================
-   DATABASE FUNCTIONS
+   DATABASE
 ========================= */
 
 async function carregarPacientes(){
+
   const { data, error } = await supabase
     .from("pacientes")
     .select("*")
-    .order("created_at", { ascending:false });
+    .order("created_at",{ascending:false});
 
   if(error){
     console.error(error);
@@ -1202,6 +1203,7 @@ async function carregarPacientes(){
 }
 
 async function salvarPacienteBanco(p){
+
   if(p.id){
 
     const { error } = await supabase
@@ -1211,14 +1213,11 @@ async function salvarPacienteBanco(p){
         alta: p.alta,
         alta_at: p.alta_at
       })
-      .eq("id", p.id);
+      .eq("id",p.id);
 
-    if(error){
-      console.error(error);
-      return;
-    }
+    if(error) console.error(error);
 
-  } else {
+  }else{
 
     const { data, error } = await supabase
       .from("pacientes")
@@ -1240,24 +1239,17 @@ async function salvarPacienteBanco(p){
 }
 
 async function deletarPacienteBanco(id){
-  const { error } = await supabase
-    .from("pacientes")
-    .delete()
-    .eq("id", id);
-
-  if(error) console.error(error);
+  await supabase.from("pacientes").delete().eq("id",id);
 }
 
 async function darAltaBanco(id){
-  const { error } = await supabase
+  await supabase
     .from("pacientes")
     .update({
       alta:true,
-      alta_at: nowISO()
+      alta_at:nowISO()
     })
-    .eq("id", id);
-
-  if(error) console.error(error);
+    .eq("id",id);
 }
 
 /* =========================
@@ -1273,12 +1265,12 @@ async function addOrUpdatePaciente(){
     const p = pacientes.find(x=>x.id===editingId);
     if(!p) return;
 
-    Object.assign(p, base);
+    Object.assign(p,base);
     p.updated_at = nowISO();
 
     await salvarPacienteBanco(p);
 
-    editingId = null;
+    editingId=null;
     updateEditUI();
     clearFormOnly();
     await carregarPacientes();
@@ -1289,7 +1281,7 @@ async function addOrUpdatePaciente(){
 
   const novo = {
     ...base,
-    created_at: created,
+    created_at:created,
     historico:[],
     alertando:false,
     alta:false,
@@ -1297,9 +1289,10 @@ async function addOrUpdatePaciente(){
   };
 
   const mins = minutosReav(novo);
-  novo.prox = new Date(Date.now() + mins*60000).toISOString();
+  novo.prox = new Date(Date.now()+mins*60000).toISOString();
 
   await salvarPacienteBanco(novo);
+
   clearFormOnly();
   await carregarPacientes();
 }
@@ -1317,7 +1310,7 @@ async function darAlta(id){
 }
 
 /* =========================
-   REALTIME SYNC
+   REALTIME
 ========================= */
 
 function initRealtime(){
@@ -1325,11 +1318,10 @@ function initRealtime(){
   if(realtimeChannel) return;
 
   realtimeChannel = supabase
-    .channel('realtime')
-    .on(
-      'postgres_changes',
-      { event:'*', schema:'public', table:'pacientes' },
-      () => carregarPacientes()
+    .channel("realtime")
+    .on("postgres_changes",
+      { event:"*", schema:"public", table:"pacientes" },
+      ()=> carregarPacientes()
     )
     .subscribe();
 }
@@ -1341,6 +1333,8 @@ function initRealtime(){
 initRealtime();
 carregarPacientes();
 setInterval(render,1000);
+
+
 
 </script>
 </body>
