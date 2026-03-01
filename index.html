@@ -1159,14 +1159,16 @@ const supabase = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
-
 /* =========================
    STATE
 ========================= */
 
+let pacientes = [];
+let editingId = null;
 
 const alarmTimers = {};
 let blinkInterval = null;
+let realtimeChannel = null;
 
 const $ = (id) => document.getElementById(id);
 
@@ -1188,7 +1190,7 @@ async function carregarPacientes(){
     return;
   }
 
-  pacientes = data.map(p => ({
+  pacientes = (data || []).map(p => ({
     id: p.id,
     ...p.dados_json,
     created_at: p.created_at,
@@ -1202,7 +1204,8 @@ async function carregarPacientes(){
 
 async function salvarPacienteBanco(p){
   if(p.id){
-    await supabase
+
+    const { error } = await supabase
       .from("pacientes")
       .update({
         dados_json: p,
@@ -1210,8 +1213,15 @@ async function salvarPacienteBanco(p){
         alta_at: p.alta_at
       })
       .eq("id", p.id);
+
+    if(error){
+      console.error(error);
+      return;
+    }
+
   } else {
-    const { data } = await supabase
+
+    const { data, error } = await supabase
       .from("pacientes")
       .insert([{
         name: p.nome,
@@ -1221,22 +1231,34 @@ async function salvarPacienteBanco(p){
       }])
       .select();
 
-    p.id = data[0].id;
+    if(error){
+      console.error(error);
+      return;
+    }
+
+    p.id = data?.[0]?.id;
   }
 }
 
 async function deletarPacienteBanco(id){
-  await supabase.from("pacientes").delete().eq("id", id);
+  const { error } = await supabase
+    .from("pacientes")
+    .delete()
+    .eq("id", id);
+
+  if(error) console.error(error);
 }
 
 async function darAltaBanco(id){
-  await supabase
+  const { error } = await supabase
     .from("pacientes")
     .update({
       alta:true,
       alta_at: nowISO()
     })
     .eq("id", id);
+
+  if(error) console.error(error);
 }
 
 /* =========================
@@ -1244,13 +1266,19 @@ async function darAltaBanco(id){
 ========================= */
 
 async function addOrUpdatePaciente(){
+
   const base = readFormToPatientBase();
 
   if(editingId){
+
     const p = pacientes.find(x=>x.id===editingId);
+    if(!p) return;
+
     Object.assign(p, base);
     p.updated_at = nowISO();
+
     await salvarPacienteBanco(p);
+
     editingId = null;
     updateEditUI();
     clearFormOnly();
@@ -1259,6 +1287,7 @@ async function addOrUpdatePaciente(){
   }
 
   const created = nowISO();
+
   const novo = {
     ...base,
     created_at: created,
@@ -1292,27 +1321,25 @@ async function darAlta(id){
    REALTIME SYNC
 ========================= */
 
-supabase
-  .channel('realtime')
-  .on('postgres_changes', { event:'*', schema:'public', table:'pacientes' }, ()=>{
-    carregarPacientes();
-  })
-  .subscribe();
+function initRealtime(){
 
-/* =========================
-   TODO RESTANTE DO SEU SCRIPT PERMANECE IGUAL:
-   - render()
-   - countdown
-   - export
-   - alarmes
-   - reavaliação
-   - etc
-========================= */
+  if(realtimeChannel) return;
+
+  realtimeChannel = supabase
+    .channel('realtime')
+    .on(
+      'postgres_changes',
+      { event:'*', schema:'public', table:'pacientes' },
+      () => carregarPacientes()
+    )
+    .subscribe();
+}
 
 /* =========================
    BOOT
 ========================= */
 
+initRealtime();
 carregarPacientes();
 setInterval(render,1000);
 
