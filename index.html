@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>REAV SMART</title>
 
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>REAV SMART</title>
+
 <style>
   :root{
     --bg:#f4f6f8;
@@ -1142,6 +1146,178 @@ render();
 
 // Atualiza countdown/atraso em tempo real
 setInterval(render, 1000);
+
+
+<script>
+/* =========================
+   SUPABASE CONFIG
+========================= */
+
+const SUPABASE_URL = "SUA_SUPABASE_URL";
+const SUPABASE_KEY = "SUA_SUPABASE_KEY";
+
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+/* =========================
+   STATE
+========================= */
+
+let pacientes = [];
+let editingId = null;
+const alarmTimers = {};
+let blinkInterval = null;
+
+const $ = (id) => document.getElementById(id);
+
+function nowISO(){ return new Date().toISOString(); }
+function hhmm(d){ return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}); }
+
+/* =========================
+   DATABASE FUNCTIONS
+========================= */
+
+async function carregarPacientes(){
+  const { data, error } = await supabase
+    .from("pacientes")
+    .select("*")
+    .order("created_at", { ascending:false });
+
+  if(error){
+    console.error(error);
+    return;
+  }
+
+  pacientes = data.map(p => ({
+    id: p.id,
+    ...p.dados_json,
+    created_at: p.created_at,
+    alta: p.alta,
+    alta_at: p.alta_at,
+    prox: p.dados_json?.prox
+  }));
+
+  render();
+}
+
+async function salvarPacienteBanco(p){
+  if(p.id){
+    await supabase
+      .from("pacientes")
+      .update({
+        dados_json: p,
+        alta: p.alta,
+        alta_at: p.alta_at
+      })
+      .eq("id", p.id);
+  } else {
+    const { data } = await supabase
+      .from("pacientes")
+      .insert([{
+        name: p.nome,
+        hd: p.hd,
+        dados_json: p,
+        alta:false
+      }])
+      .select();
+
+    p.id = data[0].id;
+  }
+}
+
+async function deletarPacienteBanco(id){
+  await supabase.from("pacientes").delete().eq("id", id);
+}
+
+async function darAltaBanco(id){
+  await supabase
+    .from("pacientes")
+    .update({
+      alta:true,
+      alta_at: nowISO()
+    })
+    .eq("id", id);
+}
+
+/* =========================
+   CRUD
+========================= */
+
+async function addOrUpdatePaciente(){
+  const base = readFormToPatientBase();
+
+  if(editingId){
+    const p = pacientes.find(x=>x.id===editingId);
+    Object.assign(p, base);
+    p.updated_at = nowISO();
+    await salvarPacienteBanco(p);
+    editingId = null;
+    updateEditUI();
+    clearFormOnly();
+    await carregarPacientes();
+    return;
+  }
+
+  const created = nowISO();
+  const novo = {
+    ...base,
+    created_at: created,
+    historico:[],
+    alertando:false,
+    alta:false,
+    alta_at:null
+  };
+
+  const mins = minutosReav(novo);
+  novo.prox = new Date(Date.now() + mins*60000).toISOString();
+
+  await salvarPacienteBanco(novo);
+  clearFormOnly();
+  await carregarPacientes();
+}
+
+async function removePaciente(id){
+  stopAlarm(id);
+  await deletarPacienteBanco(id);
+  await carregarPacientes();
+}
+
+async function darAlta(id){
+  stopAlarm(id);
+  await darAltaBanco(id);
+  await carregarPacientes();
+}
+
+/* =========================
+   REALTIME SYNC
+========================= */
+
+supabase
+  .channel('realtime')
+  .on('postgres_changes', { event:'*', schema:'public', table:'pacientes' }, ()=>{
+    carregarPacientes();
+  })
+  .subscribe();
+
+/* =========================
+   TODO RESTANTE DO SEU SCRIPT PERMANECE IGUAL:
+   - render()
+   - countdown
+   - export
+   - alarmes
+   - reavaliação
+   - etc
+========================= */
+
+/* =========================
+   BOOT
+========================= */
+
+carregarPacientes();
+setInterval(render,1000);
+
 </script>
 </body>
 </html>
