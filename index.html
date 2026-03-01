@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>REAV SMART</title>
+
+<style>
+  :root{
+    --bg:#f4f6f8;
+    --card:#ffffff;
+    --text:#0f172a;
+    --muted:#64748b;
+    --btn:#111827;
+    --btn2:#6b7280;
+    --danger:#b91c1c;
+    --success:#15803d;
+    --light:#e5e7eb;
+    --border:#cbd5e1;
+
+    --red-bg:#fee2e2;
+    --orange-bg:#ffedd5;
+    --yellow-bg:#fef9c3;
+    --green-bg:#dcfce7;
+  }
+
+  body{
+    font-family: Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 14px;
+  }
+
+  h2{ margin:0 0 6px 0; }
+  h3{ margin:14px 0 8px 0; }
+  .sub{ font-size:12px; color:var(--muted); margin-bottom:12px; }
+
+  .card{
+    background:var(--card);
+    border-radius:12px;
+    padding:12px;
+    margin-bottom:12px;
+    box-shadow:0 1px 2px rgba(0,0,0,.06);
+  }
+
+  input, textarea, select{
+    width:100%;
+    box-sizing:border-box;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    font-size:14px;
+    background:#fff;
+    margin: 4px 0;
+  }
+
+  textarea{ min-height:72px; resize:vertical; }
+
+  .row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .grow{ flex:1; }
+
+  button{
+    padding:9px 12px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    background:var(--btn);
+    color:#fff;
+    font-size:14px;
+  }
+  button.secondary{ background:var(--btn2); }
+  button.light{ background:var(--light); color:var(--text); }
+  button.danger{ background:var(--danger); }
+  button.success{ background:var(--success); }
+
+  .section-title{
+    margin:10px 0 4px;
+    font-weight:800;
+  }
+
+  .hint{ font-size:12px; color:var(--muted); }
+
+  .checks{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px 14px;
+    margin:6px 0 6px;
+    color:var(--text);
+    font-size:13px;
+  }
+  .checks label{ display:flex; gap:6px; align-items:center; }
+
+  .patients-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin: 10px 0 8px;
+  }
+
+  .patient{
+    background:var(--card);
+    padding:12px;
+    border-radius:12px;
+    box-shadow:0 1px 2px rgba(0,0,0,.06);
+    margin-bottom:10px;
+    border: 1px solid transparent;
+    transition: .2s;
+  }
+
+  .patient-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
+  }
+
+  .pname{
+    font-size:18px;
+    font-weight:900;
+    letter-spacing:.2px;
+  }
+
+  .meta{
+    font-size:12px;
+    color:var(--muted);
+    margin-top:4px;
+    line-height: 1.35;
+  }
+
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:12px;
+    border:1px solid rgba(0,0,0,.08);
+    white-space:nowrap;
+  }
+  .b-red{ background:var(--red-bg); }
+  .b-orange{ background:var(--orange-bg); }
+  .b-yellow{ background:var(--yellow-bg); }
+  .b-green{ background:var(--green-bg); }
+
+  .actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+    margin-top:8px;
+  }
+
+  .overdue{
+    border-color: #ef4444;
+    animation: pulseAlert 1.2s infinite;
+  }
+  @keyframes pulseAlert {
+    0% { background-color:#fff; }
+    50% { background-color:#ffe5e5; }
+    100% { background-color:#fff; }
+  }
+
+  /* TREMER quando atrasado */
+  .shake{
+    animation: shake 0.35s infinite;
+  }
+  @keyframes shake{
+    0%{ transform:translateX(0) }
+    25%{ transform:translateX(-3px) }
+    50%{ transform:translateX(3px) }
+    75%{ transform:translateX(-3px) }
+    100%{ transform:translateX(0) }
+  }
+
+  .overdue-line{
+    margin-top:6px;
+    font-weight:900;
+    color:#b91c1c;
+    display:flex;
+    gap:8px;
+    align-items:center;
+    font-size:13px;
+  }
+
+  .countdown{
+    font-weight:900;
+    font-size:13px;
+    padding: 2px 6px;
+    border-radius: 8px;
+    display:inline-block;
+  }
+  .cd-ok{ color:#166534; background:#dcfce7; }
+  .cd-warn{ color:#92400e; background:#ffedd5; }
+  .cd-late{ color:#991b1b; background:#fee2e2; }
+
+  .reavbox{
+    margin-top:10px;
+    padding:10px;
+    border-radius:10px;
+    background:#f1f5f9;
+    border:1px solid var(--border);
+  }
+
+  .history{
+    margin-top:10px;
+    font-size:12px;
+    color:#0f172a;
+    padding:10px;
+    background:#f8fafc;
+    border:1px solid var(--border);
+    border-radius:10px;
+    white-space:pre-wrap;
+  }
+
+  .export-wrap{ display:none; }
+  .export-box{
+    height:380px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  }
+
+  .mode-edit{
+    display:none;
+    font-size:12px;
+    font-weight:800;
+    color:#1d4ed8;
+    background:#dbeafe;
+    border:1px solid #93c5fd;
+    padding:6px 10px;
+    border-radius:10px;
+    margin-top:8px;
+  }
+
+  .strike{
+    text-decoration: line-through;
+    opacity: .7;
+  }
+
+  .tabs{
+    display:flex;
+    gap:8px;
+    margin: 10px 0 6px;
+  }
+  .tabbtn{
+    background: var(--light);
+    color: var(--text);
+  }
+  .tabbtn.active{
+    background: var(--btn);
+    color: #fff;
+  }
+
+  .mini{ font-size:12px; color:var(--muted); margin-top:6px; }
+</style>
+</head>
+
+<body>
+  <h2>REAV SMART</h2>
+  <div class="sub">Reavaliação + prontuário PS + SBAR + AutoSave + alarmes + histórico + alta</div>
+
+  <div class="card">
+    <div class="section-title">#ANAMNESE</div>
+    <input id="qp" placeholder="QUEIXA PRINCIPAL" />
+    <textarea id="hda" placeholder="HDA"></textarea>
+
+    <div class="section-title">#ANTECEDENTES</div>
+    <div class="hint">COMORBIDADES</div>
+    <div class="checks">
+      <label><input type="checkbox" id="has">HAS</label>
+      <label><input type="checkbox" id="dm">DM</label>
+      <label><input type="checkbox" id="dislip">DISLIPIDEMIA</label>
+      <label><input type="checkbox" id="etil">ETILISMO</label>
+      <label><input type="checkbox" id="tabag">TABAGISMO</label>
+      <label><input type="checkbox" id="negaComorb">NEGA</label>
+    </div>
+    <input id="outros" placeholder="OUTRAS COMORBIDADES (texto livre)" />
+    <textarea id="muc" placeholder="MUC (medicações de uso contínuo)"></textarea>
+    <textarea id="hbv" placeholder="HBV (hábitos de vida)"></textarea>
+
+    <div class="section-title">#SINAIS VITAIS</div>
+    <textarea id="sv" placeholder="Cole do MV aqui (não inventar)"></textarea>
+
+    <div class="section-title">#EXAME FÍSICO</div>
+    <textarea id="ef">GERAL: BOM ESTADO GERAL, LÚCIDO, ORIENTADO, HIDRATADO, CORADO, AFEBRIL.
+AR: MV PRESENTE BILATERALMENTE, SEM RUÍDOS ADVENTÍCIOS.
+ACV: RCR EM 2T, SEM SOPROS.
+ABD: PLANO, FLÁCIDO, INDOLOR.
+NEURO: SEM DÉFICITS FOCAIS.</textarea>
+
+    <div class="section-title">#HIPÓTESE DIAGNÓSTICA</div>
+    <textarea id="hd" placeholder="HD (1- ... 2- ...)"></textarea>
+
+    <div class="section-title">#CONDUTA</div>
+    <div class="checks">
+      <label><input type="checkbox" id="c1">SINTOMÁTICOS</label>
+      <label><input type="checkbox" id="c2">LABORATÓRIO (reav 2h)</label>
+      <label><input type="checkbox" id="c3">EXAME DE IMAGEM</label>
+      <label><input type="checkbox" id="c4">REAVALIAÇÃO</label>
+      <label><input type="checkbox" id="c5">ENCAMINHAMENTO</label>
+      <label><input type="checkbox" id="c6">PRESCRIÇÃO</label>
+      <label><input type="checkbox" id="c7">SEGUIMENTO AMBULATORIAL</label>
+    </div>
+    <textarea id="condExtra" placeholder="CONDUTA (texto livre / detalhes)"></textarea>
+
+    <div class="row">
+      <select id="cor" class="grow">
+        <option value="red">🔴 Vermelho (10 min)</option>
+        <option value="orange">🟠 Laranja (30 min)</option>
+        <option value="yellow" selected>🟡 Amarelo (60 min)</option>
+        <option value="green">🟢 Verde (120 min)</option>
+      </select>
+
+      <button class="light grow" id="btnLimpar">Limpar</button>
+    </div>
+
+    <div class="row">
+      <button id="btnAdd" class="grow">Adicionar paciente</button>
+      <button class="light" id="btnCancelarEdicao" style="display:none;">Cancelar edição</button>
+      <button class="secondary grow" id="btnExportAtual">Exportar (form)</button>
+    </div>
+
+    <div class="mode-edit" id="editBadge">📝 MODO EDIÇÃO ATIVO</div>
+    <div class="mini" id="autosaveStatus">AutoSave: ligado</div>
+  </div>
+
+  <div class="patients-head">
+    <div><b>Atendimentos</b> <span class="hint" id="countPacientes">(0)</span></div>
+    <div class="row">
+      <button class="secondary" id="btnExportTodos">Exportar TODOS</button>
+      <button class="danger" id="btnApagarTudo">Apagar tudo</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tabbtn active" id="tabAtivos">🟢 Ativos</button>
+    <button class="tabbtn" id="tabHistorico">📚 Histórico</button>
+  </div>
+
+  <div id="listaAtivos"></div>
+  <div id="listaHistorico" style="display:none;"></div>
+
+  <div class="card export-wrap" id="exportArea">
+    <div class="row" style="justify-content:space-between;">
+      <b>TXT BOX</b>
+      <div class="row">
+        <button id="btnCopiar">Copiar</button>
+        <button class="light" id="btnFecharExport">Fechar</button>
+      </div>
+    </div>
+    <textarea id="exportText" class="export-box"></textarea>
+  </div>
+
+  <audio id="alertSound">
+    <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg">
+  </audio>
+
+<script>
+/* =========================
+   STATE / STORAGE
+========================= */
+const LS_KEY = "reavsmart_full_v1";
+let pacientes = [];
+let editingId = null;
+
+// Alarmes por paciente (intervals)
+const alarmTimers = {}; // { [id]: intervalId }
+let blinkInterval = null;
+
+const $ = (id) => document.getElementById(id);
+
+function nowISO(){ return new Date().toISOString(); }
+function hhmm(d){ return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}); }
+
+function load(){
+  const raw = localStorage.getItem(LS_KEY);
+  if(!raw) return;
+
+  try{
+    const obj = JSON.parse(raw);
+    pacientes = Array.isArray(obj.pacientes) ? obj.pacientes : [];
+    editingId = obj.editingId ?? null;
+
+    // restaurar formulário
+    if(obj.form) restoreForm(obj.form);
+  }catch(e){}
+}
+
+function save(){
+  localStorage.setItem(LS_KEY, JSON.stringify({
+    pacientes,
+    editingId,
+    form: snapshotForm()
+  }));
+  $("autosaveStatus").textContent = "AutoSave: salvo às " + hhmm(new Date());
+}
+
+/* =========================
+   UI: Tabs
+========================= */
+function setTab(tab){
+  const ativosBtn = $("tabAtivos");
+  const histBtn = $("tabHistorico");
+  const ativos = $("listaAtivos");
+  const hist = $("listaHistorico");
+
+  if(tab === "ativos"){
+    ativosBtn.classList.add("active");
+    histBtn.classList.remove("active");
+    ativos.style.display = "block";
+    hist.style.display = "none";
+  } else {
+    histBtn.classList.add("active");
+    ativosBtn.classList.remove("active");
+    hist.style.display = "block";
+    ativos.style.display = "none";
+  }
+}
+
+$("tabAtivos").addEventListener("click", ()=>setTab("ativos"));
+$("tabHistorico").addEventListener("click", ()=>setTab("historico"));
+
+/* =========================
+   NOTIF + TAB BLINK
+========================= */
+function requestNotifPermission(){
+  if(!("Notification" in window)) return;
+  if(Notification.permission === "default"){
+    Notification.requestPermission();
+  }
+}
+
+function notify(title, body){
+  if(!("Notification" in window)) return;
+  if(Notification.permission === "granted"){
+    new Notification(title, { body });
+  }
+}
+
+function startTabBlink(){
+  if(blinkInterval) return;
+  blinkInterval = setInterval(()=>{
+    document.title = (document.title === "🚨 REAV ATRASADA") ? "REAV SMART" : "🚨 REAV ATRASADA";
+  }, 1000);
+}
+
+function stopTabBlink(){
+  if(blinkInterval){
+    clearInterval(blinkInterval);
+    blinkInterval = null;
+  }
+  document.title = "REAV SMART";
+}
+
+/* =========================
+   FORM SNAPSHOT / RESTORE
+========================= */
+function snapshotForm(){
+  return {
+    qp:$("qp").value, hda:$("hda").value,
+    has:$("has").checked, dm:$("dm").checked, dislip:$("dislip").checked, etil:$("etil").checked, tabag:$("tabag").checked, negaComorb:$("negaComorb").checked,
+    outros:$("outros").value,
+    muc:$("muc").value,
+    hbv:$("hbv").value,
+    sv:$("sv").value,
+    ef:$("ef").value,
+    hd:$("hd").value,
+    c1:$("c1").checked, c2:$("c2").checked, c3:$("c3").checked, c4:$("c4").checked, c5:$("c5").checked, c6:$("c6").checked, c7:$("c7").checked,
+    condExtra:$("condExtra").value,
+    cor:$("cor").value
+  };
+}
+
+function restoreForm(f){
+  $("qp").value = f.qp ?? "";
+  $("hda").value = f.hda ?? "";
+  $("has").checked = !!f.has;
+  $("dm").checked = !!f.dm;
+  $("dislip").checked = !!f.dislip;
+  $("etil").checked = !!f.etil;
+  $("tabag").checked = !!f.tabag;
+  $("negaComorb").checked = !!f.negaComorb;
+  $("outros").value = f.outros ?? "";
+  $("muc").value = f.muc ?? "";
+  $("hbv").value = f.hbv ?? "";
+  $("sv").value = f.sv ?? "";
+  $("ef").value = f.ef ?? $("ef").value;
+  $("hd").value = f.hd ?? "";
+  $("c1").checked = !!f.c1;
+  $("c2").checked = !!f.c2;
+  $("c3").checked = !!f.c3;
+  $("c4").checked = !!f.c4;
+  $("c5").checked = !!f.c5;
+  $("c6").checked = !!f.c6;
+  $("c7").checked = !!f.c7;
+  $("condExtra").value = f.condExtra ?? "";
+  $("cor").value = f.cor ?? "yellow";
+}
+
+/* =========================
+   COMORBIDADES / CONDUTA
+========================= */
+function wireNegaComorb(){
+  $("negaComorb").addEventListener("change", ()=>{
+    if($("negaComorb").checked){
+      ["has","dm","dislip","etil","tabag"].forEach(id => $(id).checked = false);
+      $("outros").value = "";
+    }
+    save();
+  });
+
+  ["has","dm","dislip","etil","tabag"].forEach(id=>{
+    $(id).addEventListener("change", ()=>{
+      if($(id).checked) $("negaComorb").checked = false;
+      save();
+    });
+  });
+
+  $("outros").addEventListener("input", ()=>{
+    if(($("outros").value || "").trim()) $("negaComorb").checked = false;
+    save();
+  });
+}
+
+function montarComorb(p){
+  if(p.comorb?.nega) return "NEGA COMORBIDADES.";
+
+  const lista = [];
+  if(p.comorb?.has) lista.push("HAS");
+  if(p.comorb?.dm) lista.push("DM");
+  if(p.comorb?.dislip) lista.push("DISLIPIDEMIA");
+  if(p.comorb?.etil) lista.push("ETILISMO");
+  if(p.comorb?.tabag) lista.push("TABAGISMO");
+  if((p.comorb?.outros || "").trim()) lista.push(p.comorb.outros.trim().toUpperCase());
+
+  return lista.length ? (lista.join(", ") + ".") : "-";
+}
+
+function montarConduta(p){
+  const lista = [];
+  if(p.conduta?.sintomaticos) lista.push("SINTOMÁTICOS");
+  if(p.conduta?.laboratorio) lista.push("LABORATÓRIO");
+  if(p.conduta?.imagem) lista.push("EXAME DE IMAGEM");
+  if(p.conduta?.reavaliacao) lista.push("REAVALIAÇÃO");
+  if(p.conduta?.encaminhamento) lista.push("ENCAMINHAMENTO");
+  if(p.conduta?.prescricao) lista.push("PRESCRIÇÃO");
+  if(p.conduta?.ambulatorial) lista.push("SEGUIMENTO AMBULATORIAL");
+  if((p.conduta?.extra || "").trim()) lista.push(p.conduta.extra.trim());
+  return lista.length ? lista.join(", ") : "-";
+}
+
+/* =========================
+   TIMER RULES
+========================= */
+function intervaloPorCor(c){
+  if(c==="red") return 10;
+  if(c==="orange") return 30;
+  if(c==="yellow") return 60;
+  if(c==="green") return 120;
+  return 60;
+}
+
+// REGRA: se marcou LABORATÓRIO -> reav = 2h (120 min)
+function minutosReav(p){
+  if(p.conduta?.laboratorio) return 120;
+  return intervaloPorCor(p.cor);
+}
+
+function corBadgeClass(c){
+  if(c==="red") return "b-red";
+  if(c==="orange") return "b-orange";
+  if(c==="yellow") return "b-yellow";
+  if(c==="green") return "b-green";
+  return "b-yellow";
+}
+function corLabel(c){
+  if(c==="red") return "🔴 RED";
+  if(c==="orange") return "🟠 ORANGE";
+  if(c==="yellow") return "🟡 YELLOW";
+  if(c==="green") return "🟢 GREEN";
+  return "🟡 YELLOW";
+}
+
+function formatDuration(ms){
+  const totalMin = Math.max(0, Math.floor(ms/60000));
+  const h = Math.floor(totalMin/60);
+  const m = totalMin%60;
+  return `${h}h ${m}min`;
+}
+
+function countdownInfo(proxISO){
+  const prox = new Date(proxISO).getTime();
+  const now = Date.now();
+  const diff = prox - now;
+
+  if(diff <= 0){
+    return { text:"ATRASADO", cls:"cd-late", overdue:true, diff };
+  }
+
+  const min = Math.floor(diff/60000);
+  const sec = Math.floor((diff%60000)/1000);
+
+  // warn: <10 min
+  const cls = diff < 10*60000 ? "cd-warn" : "cd-ok";
+  return { text:`${min}m ${sec}s`, cls, overdue:false, diff };
+}
+
+/* =========================
+   ALARMS
+========================= */
+function startAlarm(id, nome){
+  if(alarmTimers[id]) return;
+
+  const audio = $("alertSound");
+  try{ audio.play(); }catch(e){}
+
+  notify("REAVALIAR PACIENTE", `${nome} está atrasado`);
+
+  alarmTimers[id] = setInterval(()=>{
+    try{ audio.play(); }catch(e){}
+  }, 15000);
+}
+
+function stopAlarm(id){
+  if(!alarmTimers[id]) return;
+  clearInterval(alarmTimers[id]);
+  delete alarmTimers[id];
+}
+
+/* =========================
+   EXPORT MODELS: PS + SBAR
+========================= */
+function short1(t){
+  return (t || "-").toString().trim().replace(/\s+/g," ").slice(0,220) || "-";
+}
+
+function buildPS(p){
+  return `#ANAMNESE
+QUEIXA PRINCIPAL: ${p.qp || "-"}
+HDA: ${p.hda || "-"}
+
+---
+#ANTECEDENTES
+COMORBIDADES: ${montarComorb(p)}
+OUTROS: ${(p.comorb?.outros || "-")}
+MUC: ${p.muc || "-"}
+HBV: ${p.hbv || "-"}
+
+---
+#SINAIS VITAIS
+${p.sv || "-"}
+
+---
+#EXAME FÍSICO
+${p.ef || "-"}
+
+---
+#HIPÓTESE DIAGNÓSTICA
+${p.hd || "-"}
+
+---
+#CONDUTA
+${montarConduta(p)}`;
+}
+
+function buildSBAR(p){
+  const S = `S: PACIENTE EM AVALIAÇÃO NO PS. QUEIXA: ${short1(p.qp)}.`;
+  const B = `B: ANTECEDENTES: ${short1(montarComorb(p))} MUC: ${short1(p.muc)}.`;
+  const A = `A: SV: ${short1(p.sv)} EF: ${short1(p.ef)} HIPÓTESE: ${short1(p.hd)}.`;
+  const R = `R: CONDUTA/PLANO: ${short1(montarConduta(p))}.`;
+  return `#SBAR
+${S}
+${B}
+${A}
+${R}`;
+}
+
+function exportOne(p){
+  return `${buildPS(p)}
+---
+${buildSBAR(p)}`;
+}
+
+function exportAll(){
+  if(!pacientes.length) return "";
+  const blocks = pacientes.map(p=>{
+    const status = p.alta ? "ALTA" : "ATIVO";
+    return `# PACIENTE: ${p.nome} (${status})
+---
+${exportOne(p)}`;
+  });
+  return blocks.join("\n\n---\n\n");
+}
+
+function showExport(text){
+  $("exportText").value = text;
+  $("exportArea").style.display = "block";
+  $("exportArea").classList.remove("export-wrap");
+  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+}
+
+function hideExport(){
+  $("exportArea").style.display = "none";
+}
+
+async function copyExport(){
+  const t = $("exportText").value || "";
+  try{
+    await navigator.clipboard.writeText(t);
+    alert("Copiado!");
+  }catch(e){
+    $("exportText").select();
+    document.execCommand("copy");
+    alert("Copiado!");
+  }
+}
+
+/* =========================
+   CRUD + EDIT MODE
+========================= */
+function uid(){
+  try{
+    return crypto.randomUUID();
+  }catch(e){
+    return Math.random().toString(16).slice(2) + Date.now().toString(16);
+  }
+}
+
+function updateEditUI(){
+  const cancel = $("btnCancelarEdicao");
+  const badge = $("editBadge");
+
+  if(editingId){
+    $("btnAdd").textContent = "Salvar alterações";
+    cancel.style.display = "inline-block";
+    badge.style.display = "block";
+  } else {
+    $("btnAdd").textContent = "Adicionar paciente";
+    cancel.style.display = "none";
+    badge.style.display = "none";
+  }
+}
+
+function clearFormOnly(){
+  $("qp").value = "";
+  $("hda").value = "";
+
+  ["has","dm","dislip","etil","tabag","negaComorb"].forEach(id => $(id).checked = false);
+  $("outros").value = "";
+  $("muc").value = "";
+  $("hbv").value = "";
+  $("sv").value = "";
+
+  // mantém exame físico padrão
+  $("hd").value = "";
+
+  ["c1","c2","c3","c4","c5","c6","c7"].forEach(id => $(id).checked = false);
+  $("condExtra").value = "";
+  $("cor").value = "yellow";
+}
+
+function cancelEdit(){
+  editingId = null;
+  updateEditUI();
+  clearFormOnly();
+  save();
+}
+
+function readFormToPatientBase(){
+  return {
+    nome: (($("qp").value || "").trim() || "SEM QP"),
+    qp: ($("qp").value || "").trim(),
+    hda: ($("hda").value || "").trim(),
+    comorb: {
+      nega: $("negaComorb").checked,
+      has: $("has").checked,
+      dm: $("dm").checked,
+      dislip: $("dislip").checked,
+      etil: $("etil").checked,
+      tabag: $("tabag").checked,
+      outros: ($("outros").value || "").trim()
+    },
+    muc: ($("muc").value || "").trim(),
+    hbv: ($("hbv").value || "").trim(),
+    sv: ($("sv").value || "").trim(),
+    ef: ($("ef").value || "").trim(),
+    hd: ($("hd").value || "").trim(),
+    conduta: {
+      sintomaticos: $("c1").checked,
+      laboratorio: $("c2").checked,
+      imagem: $("c3").checked,
+      reavaliacao: $("c4").checked,
+      encaminhamento: $("c5").checked,
+      prescricao: $("c6").checked,
+      ambulatorial: $("c7").checked,
+      extra: ($("condExtra").value || "").trim()
+    },
+    cor: $("cor").value
+  };
+}
+
+function addOrUpdatePaciente(){
+  const base = readFormToPatientBase();
+
+  if(editingId){
+    const idx = pacientes.findIndex(p => p.id === editingId);
+    if(idx >= 0){
+      // mantém histórico, created, alta, etc.
+      pacientes[idx] = {
+        ...pacientes[idx],
+        ...base,
+        updated_at: nowISO()
+      };
+      // não muda automaticamente prox ao editar (você pode querer manter). Se quiser, a gente ativa.
+    }
+    editingId = null;
+    updateEditUI();
+    clearFormOnly();
+    save();
+    render();
+    return;
+  }
+
+  const created = nowISO();
+  const temp = {
+    id: uid(),
+    created_at: created,
+    updated_at: created,
+    historico: [],
+    alertando: false,
+    alta: false,
+    alta_at: null,
+    ...base
+  };
+
+  const mins = minutosReav(temp);
+  temp.prox = new Date(Date.now() + mins*60000).toISOString();
+
+  pacientes.unshift(temp);
+  clearFormOnly();
+  save();
+  render();
+}
+
+function editPaciente(id){
+  const p = pacientes.find(x => x.id === id);
+  if(!p) return;
+
+  editingId = id;
+
+  $("qp").value = p.qp || "";
+  $("hda").value = p.hda || "";
+
+  $("negaComorb").checked = !!p.comorb?.nega;
+  $("has").checked = !!p.comorb?.has;
+  $("dm").checked = !!p.comorb?.dm;
+  $("dislip").checked = !!p.comorb?.dislip;
+  $("etil").checked = !!p.comorb?.etil;
+  $("tabag").checked = !!p.comorb?.tabag;
+  $("outros").value = p.comorb?.outros || "";
+
+  $("muc").value = p.muc || "";
+  $("hbv").value = p.hbv || "";
+  $("sv").value = p.sv || "";
+  $("ef").value = p.ef || $("ef").value;
+  $("hd").value = p.hd || "";
+
+  $("c1").checked = !!p.conduta?.sintomaticos;
+  $("c2").checked = !!p.conduta?.laboratorio;
+  $("c3").checked = !!p.conduta?.imagem;
+  $("c4").checked = !!p.conduta?.reavaliacao;
+  $("c5").checked = !!p.conduta?.encaminhamento;
+  $("c6").checked = !!p.conduta?.prescricao;
+  $("c7").checked = !!p.conduta?.ambulatorial;
+  $("condExtra").value = p.conduta?.extra || "";
+
+  $("cor").value = p.cor || "yellow";
+
+  updateEditUI();
+  save();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function removePaciente(id){
+  stopAlarm(id);
+  pacientes = pacientes.filter(p => p.id !== id);
+  if(editingId === id) editingId = null;
+  updateEditUI();
+  save();
+  render();
+}
+
+function darAlta(id){
+  const p = pacientes.find(x => x.id === id);
+  if(!p) return;
+
+  p.alta = true;
+  p.alta_at = nowISO();
+  p.alertando = false;
+  stopAlarm(id);
+
+  save();
+  render();
+}
+
+/* =========================
+   REAVALIAÇÃO (textbox) + histórico
+========================= */
+function openReavBox(id){
+  const box = $("reavbox-"+id);
+  if(!box) return;
+
+  box.innerHTML = `
+    <div class="reavbox">
+      <textarea id="reavtext-${id}" placeholder="Descreva a reavaliação (texto curto e defensável)"></textarea>
+      <div class="row">
+        <button class="secondary" onclick="saveReav('${id}')">Salvar reavaliação</button>
+        <button class="light" onclick="closeReavBox('${id}')">Cancelar</button>
+      </div>
+      <div class="hint">Ao salvar: registra hora + texto e reprograma a próxima reavaliação (LAB = 2h).</div>
+    </div>
+  `;
+}
+
+function closeReavBox(id){
+  const box = $("reavbox-"+id);
+  if(box) box.innerHTML = "";
+}
+
+function saveReav(id){
+  const p = pacientes.find(x => x.id === id);
+  if(!p) return;
+
+  const t = $("reavtext-"+id);
+  const texto = (t ? t.value : "").trim();
+  if(!texto) return;
+
+  const hora = hhmm(new Date());
+  p.historico = p.historico || [];
+  p.historico.unshift(`⏰ ${hora} — ${texto}`);
+
+  // reprograma
+  const mins = minutosReav(p);
+  p.prox = new Date(Date.now() + mins*60000).toISOString();
+
+  // reseta alarme
+  p.alertando = false;
+  stopAlarm(p.id);
+
+  save();
+  render();
+}
+
+/* =========================
+   EXPORT buttons
+========================= */
+function exportPacienteAtual(){
+  const temp = readFormToPatientBase();
+  // montar "paciente temporário" só para export
+  temp.prox = new Date(Date.now()).toISOString();
+  temp.created_at = nowISO();
+  temp.nome = temp.nome || "PACIENTE (FORM)";
+  showExport(exportOne(temp));
+}
+
+/* =========================
+   RENDER
+========================= */
+function render(){
+  $("countPacientes").textContent = `(${pacientes.length})`;
+
+  const ativos = $("listaAtivos");
+  const hist = $("listaHistorico");
+  ativos.innerHTML = "";
+  hist.innerHTML = "";
+
+  // ordenar: atrasados (ativos) primeiro, depois por prox asc
+  pacientes.sort((a,b)=>{
+    const ao = !a.alta && (new Date(a.prox).getTime() <= Date.now());
+    const bo = !b.alta && (new Date(b.prox).getTime() <= Date.now());
+    if(ao !== bo) return ao ? -1 : 1;
+    return new Date(a.prox).getTime() - new Date(b.prox).getTime();
+  });
+
+  let anyOverdue = false;
+
+  pacientes.forEach(p=>{
+    const cd = countdownInfo(p.prox);
+    const overdueActive = (!p.alta) && cd.overdue;
+
+    if(overdueActive) anyOverdue = true;
+
+    // alarme e flag
+    if(overdueActive){
+      if(!p.alertando){
+        p.alertando = true;
+        startAlarm(p.id, p.nome);
+      }
+    } else {
+      // se não está mais atrasado, garante parar timer e flag
+      if(p.alertando){
+        p.alertando = false;
+        stopAlarm(p.id);
+      }
+    }
+
+    // permanência
+    const start = new Date(p.created_at).getTime();
+    const end = p.alta ? new Date(p.alta_at).getTime() : Date.now();
+    const permanencia = formatDuration(end - start);
+
+    // título meta
+    const proxStr = hhmm(new Date(p.prox));
+
+    // classes
+    const card = document.createElement("div");
+    card.className = "patient";
+    if(overdueActive) card.classList.add("overdue","shake");
+
+    const nameClass = p.alta ? "pname strike" : "pname";
+
+    card.innerHTML = `
+      <div class="patient-top">
+        <div>
+          <div class="${nameClass}">${escapeHtml(p.nome)}</div>
+          <div class="meta">
+            Próx. reav: <b>${proxStr}</b>
+            ${!p.alta ? ` • <span class="countdown ${cd.cls}">${cd.text}</span>` : ""}
+            <br>
+            Permanência: <b>${permanencia}</b>
+            ${p.alta && p.alta_at ? `<br>Alta: <b>${new Date(p.alta_at).toLocaleString()}</b>` : ""}
+            <br>
+            HD: ${escapeHtml(p.hd || "-")}
+          </div>
+
+          ${overdueActive ? `<div class="overdue-line">🚨 ATRASADO</div>` : ``}
+        </div>
+
+        <div style="text-align:right;">
+          <span class="badge ${corBadgeClass(p.cor)}">${corLabel(p.cor)}</span>
+
+          <div class="actions">
+            ${!p.alta ? `<button class="success" onclick="darAlta('${p.id}')">Alta</button>` : ``}
+            ${!p.alta ? `<button onclick="openReavBox('${p.id}')">Reavaliar</button>` : ``}
+            <button class="secondary" onclick="showExport(exportOneById('${p.id}'))">Exportar</button>
+            <button class="light" onclick="editPaciente('${p.id}')">Editar</button>
+            <button class="light" onclick="stopAlarm('${p.id}')">Silenciar</button>
+            <button class="danger" onclick="removePaciente('${p.id}')">X</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="reavbox-${p.id}"></div>
+
+      <div class="history">${(p.historico && p.historico.length) ? escapeHtml(p.historico.join("\\n\\n")) : "Histórico: -"}</div>
+    `;
+
+    if(p.alta) hist.appendChild(card);
+    else ativos.appendChild(card);
+  });
+
+  // blink da aba
+  if(anyOverdue) startTabBlink();
+  else stopTabBlink();
+
+  save();
+}
+
+function exportOneById(id){
+  const p = pacientes.find(x => x.id === id);
+  if(!p) return "";
+  return exportOne(p);
+}
+
+function escapeHtml(str){
+  return (str || "").toString()
+    .replaceAll("&","&amp;").replaceAll("<","&lt;")
+    .replaceAll(">","&gt;").replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+/* =========================
+   AUTOSAVE events
+========================= */
+function wireAutosave(){
+  const ids = ["qp","hda","outros","muc","hbv","sv","ef","hd","condExtra","cor"];
+  ids.forEach(id=>{
+    $(id).addEventListener("input", save);
+    $(id).addEventListener("change", save);
+  });
+
+  ["c1","c2","c3","c4","c5","c6","c7"].forEach(id=>{
+    $(id).addEventListener("change", save);
+  });
+
+  ["has","dm","dislip","etil","tabag","negaComorb"].forEach(id=>{
+    $(id).addEventListener("change", save);
+  });
+}
+
+/* =========================
+   BUTTONS
+========================= */
+$("btnAdd").addEventListener("click", addOrUpdatePaciente);
+
+$("btnCancelarEdicao").addEventListener("click", cancelEdit);
+
+$("btnLimpar").addEventListener("click", ()=>{
+  editingId = null;
+  updateEditUI();
+  clearFormOnly();
+  save();
+});
+
+$("btnExportAtual").addEventListener("click", exportPacienteAtual);
+
+$("btnExportTodos").addEventListener("click", ()=>showExport(exportAll()));
+
+$("btnApagarTudo").addEventListener("click", ()=>{
+  if(!confirm("Apagar tudo salvo no navegador?")) return;
+  pacientes.forEach(p=>stopAlarm(p.id));
+  pacientes = [];
+  editingId = null;
+  localStorage.removeItem(LS_KEY);
+  render();
+  alert("Tudo apagado.");
+});
+
+$("btnCopiar").addEventListener("click", copyExport);
+$("btnFecharExport").addEventListener("click", hideExport);
+
+/* =========================
+   BOOT
+========================= */
+requestNotifPermission();
+wireNegaComorb();
+wireAutosave();
+
+load();
+updateEditUI();
+render();
+
+// Atualiza countdown/atraso em tempo real
+setInterval(render, 1000);
+</script>
+</body>
+</html>
