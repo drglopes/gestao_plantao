@@ -143,10 +143,28 @@ NEURO: SEM DÉFICITS FOCAIS.</textarea>
 
 const SUPABASE_URL = "https://qrvlpupxzvqvwcgwwamr.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFydmxwdXB4enZxdndjZ3d3YW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzNTE1NjUsImV4cCI6MjA4NzkyNzU2NX0.1k1P_IviJLaHvBK79jpUvm1uTrcLY01umYJsGerLq2Y";
+
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let pacientes = [];
+
+/* =========================
+   MAPA CONDUTAS
+========================= */
+
+const mapaCondutas = {
+  1:"Sintomáticos",
+  2:"Exames laboratoriais",
+  3:"Exames de imagem",
+  4:"Reavaliação",
+  5:"Internação",
+  6:"Alta após atendimento",
+  7:"Prescrição para uso domiciliar",
+  8:"Encaminhamento"
+};
+
+/* ========================= */
 
 function intervaloPorCor(c){
   if(c==="red") return 10;
@@ -227,12 +245,20 @@ function tocarAlarme(){
   audio.play();
 }
 
+/* =========================
+   EXPORTAÇÃO COM TEXTBOX
+========================= */
+
 function exportar(id){
 
   const registro = pacientes.find(p=>p.id===id);
   if(!registro) return;
 
   const o = registro.dados_json;
+
+  const condutasTexto = (o.conduta||[])
+    .map(num => mapaCondutas[num])
+    .join("\n");
 
   const texto = `#ANAMNESE
 QP: ${o.qp}
@@ -258,15 +284,50 @@ ${o.hd}
 
 ---
 #CONDUTA
-${(o.conduta||[]).join(", ")}`;
+${condutasTexto}
+`;
 
-  try {
-    navigator.clipboard.writeText(texto);
-    alert("Copiado para área de transferência.");
-  } catch {
-    prompt("Copie manualmente:", texto);
-  }
+  mostrarExport(texto);
 }
+
+function mostrarExport(texto){
+
+  let modal = document.getElementById("exportModal");
+
+  if(!modal){
+    modal = document.createElement("div");
+    modal.id = "exportModal";
+    modal.style.position="fixed";
+    modal.style.top="0";
+    modal.style.left="0";
+    modal.style.width="100%";
+    modal.style.height="100%";
+    modal.style.background="rgba(0,0,0,.7)";
+    modal.style.display="flex";
+    modal.style.justifyContent="center";
+    modal.style.alignItems="center";
+    modal.style.zIndex="9999";
+
+    modal.innerHTML = `
+      <div style="width:90%;max-width:700px;background:#1e293b;padding:20px;border-radius:10px;">
+        <textarea id="exportTextArea" style="width:100%;height:400px;background:#0f172a;color:#e2e8f0;border:1px solid #334155;padding:10px;border-radius:8px;"></textarea>
+        <br><br>
+        <button onclick="fecharExport()">Fechar</button>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+  }
+
+  document.getElementById("exportTextArea").value = texto;
+}
+
+function fecharExport(){
+  const modal = document.getElementById("exportModal");
+  if(modal) modal.remove();
+}
+
+/* ========================= */
 
 function render(){
 
@@ -287,7 +348,7 @@ function render(){
     card.innerHTML = `
       <b>${obj.nome}</b><br>
       Próx reav: ${new Date(obj.prox).toLocaleTimeString()}<br><br>
-      <button class="success" onclick="exportar('${p.id}')">Exportar</button>
+      <button onclick="exportar('${p.id}')">Exportar</button>
       <button onclick="darAlta('${p.id}')">ALTA</button>
       <button class="danger" onclick="deletar('${p.id}')">DELETAR</button>
     `;
@@ -307,6 +368,5 @@ carregar();
 setInterval(render,10000);
 
 </script>
-
 </body>
 </html>
