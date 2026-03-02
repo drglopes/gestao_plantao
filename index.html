@@ -143,7 +143,6 @@ NEURO: SEM DÉFICITS FOCAIS.</textarea>
 
 const SUPABASE_URL = "https://qrvlpupxzvqvwcgwwamr.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFydmxwdXB4enZxdndjZ3d3YW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzNTE1NjUsImV4cCI6MjA4NzkyNzU2NX0.1k1P_IviJLaHvBK79jpUvm1uTrcLY01umYJsGerLq2Y";
-
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -158,18 +157,34 @@ function intervaloPorCor(c){
 }
 
 async function carregar(){
-  const { data } = await db.from("pacientes").select("*").order("created_at",{ascending:false});
+  const { data } = await db
+    .from("pacientes")
+    .select("*")
+    .order("created_at",{ascending:false});
+
   pacientes = data || [];
   render();
 }
 
-async function salvar(p){
-  if(p.id){
-    await db.from("pacientes").update({ dados_json:p }).eq("id",p.id);
-  } else {
-    const { data } = await db.from("pacientes").insert([{ dados_json:p }]).select();
-    p.id = data[0].id;
-  }
+async function salvarNovo(p){
+  const { data } = await db
+    .from("pacientes")
+    .insert([{ dados_json:p }])
+    .select();
+
+  return data[0].id;
+}
+
+async function atualizarExistente(id, obj){
+  await db
+    .from("pacientes")
+    .update({ dados_json: obj })
+    .eq("id", id);
+}
+
+async function deletar(id){
+  await db.from("pacientes").delete().eq("id", id);
+  carregar();
 }
 
 async function addPaciente(){
@@ -193,48 +208,17 @@ async function addPaciente(){
     alta:false
   };
 
-  await salvar(novo);
-  limpar();
+  await salvarNovo(novo);
   carregar();
 }
 
-function limpar(){
-  document.querySelectorAll(".checklist input").forEach(c=>c.checked=false);
-}
-
-function render(){
-
-  const div = document.getElementById("lista");
-  div.innerHTML="";
-
-  pacientes.forEach(p=>{
-
-    const obj = p.dados_json;
-
-    const atrasado = new Date(obj.prox) <= new Date() && !obj.alta;
-
-    if(atrasado) tocarAlarme();
-
-    const card = document.createElement("div");
-    card.className="card";
-    if(obj.alta) card.classList.add("alta");
-
-    card.innerHTML = `
-      <b>${obj.nome}</b><br>
-      Próx reav: ${new Date(obj.prox).toLocaleTimeString()}<br>
-      <button class="success" onclick="exportar(${p.id})">Exportar</button>
-      <button class="danger" onclick="darAlta('${p.id}')">ALTA</button>
-    `;
-
-    div.appendChild(card);
-  });
-}
-
 async function darAlta(id){
-  const p = pacientes.find(x=>x.id===id);
-  if(!p) return;
-  p.dados_json.alta=true;
-  await salvar(p.dados_json);
+  const registro = pacientes.find(p=>p.id===id);
+  if(!registro) return;
+
+  registro.dados_json.alta = true;
+
+  await atualizarExistente(id, registro.dados_json);
   carregar();
 }
 
@@ -244,10 +228,11 @@ function tocarAlarme(){
 }
 
 function exportar(id){
-  const p = pacientes.find(x=>x.id===id);
-  const o = p.dados_json;
 
-  const condutaTexto = (o.conduta||[]).join(", ");
+  const registro = pacientes.find(p=>p.id===id);
+  if(!registro) return;
+
+  const o = registro.dados_json;
 
   const texto = `#ANAMNESE
 QP: ${o.qp}
@@ -273,11 +258,42 @@ ${o.hd}
 
 ---
 #CONDUTA
-${condutaTexto}
-`;
+${(o.conduta||[]).join(", ")}`;
 
-  navigator.clipboard.writeText(texto);
-  alert("Copiado para área de transferência.");
+  try {
+    navigator.clipboard.writeText(texto);
+    alert("Copiado para área de transferência.");
+  } catch {
+    prompt("Copie manualmente:", texto);
+  }
+}
+
+function render(){
+
+  const div = document.getElementById("lista");
+  div.innerHTML="";
+
+  pacientes.forEach(p=>{
+
+    const obj = p.dados_json;
+    const atrasado = new Date(obj.prox) <= new Date() && !obj.alta;
+
+    if(atrasado) tocarAlarme();
+
+    const card = document.createElement("div");
+    card.className="card";
+    if(obj.alta) card.classList.add("alta");
+
+    card.innerHTML = `
+      <b>${obj.nome}</b><br>
+      Próx reav: ${new Date(obj.prox).toLocaleTimeString()}<br><br>
+      <button class="success" onclick="exportar('${p.id}')">Exportar</button>
+      <button onclick="darAlta('${p.id}')">ALTA</button>
+      <button class="danger" onclick="deletar('${p.id}')">DELETAR</button>
+    `;
+
+    div.appendChild(card);
+  });
 }
 
 db.channel("realtime")
@@ -287,9 +303,8 @@ db.channel("realtime")
   )
   .subscribe();
 
-setInterval(render,10000);
-
 carregar();
+setInterval(render,10000);
 
 </script>
 
