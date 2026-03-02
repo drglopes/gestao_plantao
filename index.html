@@ -21,10 +21,9 @@
   --danger:#dc2626;
   --success:#16a34a;
   --warn:#f59e0b;
-  --late:#ef4444;
 
   --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
 }
 
 *{ box-sizing:border-box; }
@@ -37,13 +36,10 @@ body{
   color: var(--text);
 }
 
+.wrap{ max-width: 980px; margin: 0 auto; }
+
 h2{ margin:0 0 6px 0; letter-spacing:.5px; }
 .sub{ color:var(--muted); font-size:12px; margin-bottom:12px; }
-
-.wrap{
-  max-width: 980px;
-  margin: 0 auto;
-}
 
 .card{
   background: rgba(11,16,32,.82);
@@ -57,7 +53,7 @@ h2{ margin:0 0 6px 0; letter-spacing:.5px; }
 
 label.title{
   display:block;
-  font-weight:800;
+  font-weight:900;
   margin: 10px 0 6px;
   letter-spacing:.4px;
 }
@@ -98,17 +94,15 @@ button{
   border: 0;
   border-radius: 12px;
   padding: 10px 12px;
-  font-weight: 800;
+  font-weight: 900;
   cursor: pointer;
   color: #fff;
   background: var(--btn);
 }
-
 button.secondary{ background: var(--btn2); }
 button.danger{ background: var(--danger); }
 button.success{ background: var(--success); }
 button.warn{ background: var(--warn); color:#111827; }
-
 button:active{ transform: translateY(1px); }
 
 hr.sep{
@@ -124,7 +118,6 @@ hr.sep{
   gap:8px;
   margin-top: 6px;
 }
-
 .conduta-checklist label{
   display:flex;
   align-items:center;
@@ -137,13 +130,11 @@ hr.sep{
   font-size:15px;
   line-height:1.2;
 }
-
 .conduta-checklist input{
   width:22px;
   height:22px;
   accent-color: #60a5fa;
 }
-
 .conduta-checklist label.checked{
   border-color: rgba(96,165,250,.8);
   box-shadow: 0 0 0 3px rgba(96,165,250,.12) inset;
@@ -175,7 +166,7 @@ hr.sep{
 
 .pname{
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 950;
   letter-spacing: .3px;
 }
 
@@ -188,25 +179,13 @@ hr.sep{
   line-height: 1.4;
 }
 
-.badge{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  font-size: 12px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(31,42,68,.9);
-  background: rgba(11,16,32,.85);
-}
-
 .cd{
   display:inline-block;
   padding: 3px 8px;
   border-radius: 10px;
-  font-weight: 900;
+  font-weight: 950;
   margin-left: 6px;
 }
-
 .cd-ok{ background: rgba(22,163,74,.15); color: #86efac; }
 .cd-warn{ background: rgba(245,158,11,.15); color: #fde68a; }
 .cd-late{ background: rgba(239,68,68,.16); color: #fecaca; }
@@ -227,32 +206,16 @@ hr.sep{
   padding: 9px 10px;
   border-radius: 12px;
   font-size: 12px;
-  font-weight: 900;
-}
-
-.reavbox{
-  margin-top: 10px;
-  padding: 10px;
-  border-radius: 12px;
-  border: 1px solid rgba(31,42,68,.9);
-  background: rgba(11,16,32,.7);
-}
-
-.reavbox textarea{
-  min-height: 90px;
+  font-weight: 950;
 }
 
 /* ===== TXT BOX ===== */
-#exportArea{
-  display:none;
-}
-
+#exportArea{ display:none; }
 .export-box{
   min-height: 280px;
   font-family: var(--mono);
 }
 
-/* ===== MOBILE FIXES ===== */
 @media(max-width:420px){
   body{ padding: 10px; }
   .grow{ min-width: 100%; }
@@ -264,7 +227,7 @@ hr.sep{
 <body>
 <div class="wrap">
   <h2>REAV SMART</h2>
-  <div class="sub">Multi-dispositivo (Supabase) • Reavaliação • Export TXTBOX • Dark mode</div>
+  <div class="sub">Multi-dispositivo (Supabase) • Export TXTBOX • Dark mode</div>
 
   <!-- FORM -->
   <div class="card">
@@ -278,15 +241,16 @@ hr.sep{
     <label class="title">#SINAIS VITAIS</label>
     <textarea id="sv"></textarea>
 
-    <label class="title">#CONDUTA</label>
-    <div class="conduta-checklist" id="condutaChecklist"></div>
-    <textarea id="condutaLivre" placeholder="Conduta livre (opcional)..."></textarea>
-
     <label class="title">#EXAME FÍSICO</label>
     <textarea id="ef"></textarea>
 
     <label class="title">#HIPÓTESE DIAGNÓSTICA</label>
     <textarea id="hd" placeholder="HD (1- ... 2- ...)"></textarea>
+
+    <!-- ✅ CONDUTA POR ÚLTIMO -->
+    <label class="title">#CONDUTA</label>
+    <div class="conduta-checklist" id="condutaChecklist"></div>
+    <textarea id="condutaLivre" placeholder="Conduta livre (opcional)..."></textarea>
 
     <hr class="sep">
 
@@ -323,116 +287,61 @@ hr.sep{
       </div>
     </div>
     <textarea id="exportText" class="export-box"></textarea>
-    <div class="small">Dica: você pode selecionar e copiar manualmente.</div>
+    <div class="small">Dica: selecione e copie manualmente.</div>
   </div>
 
   <audio id="alertSound">
     <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg">
   </audio>
-
 </div>
 
 <script>
 /* =========================
-   SUPABASE CONFIG (seu)
+   SUPABASE CONFIG (como você enviou)
 ========================= */
 const SUPABASE_URL = "https://qrvlpupxzvqvwcgwwamr.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFydmxwdXB4enZxdndjZ3d3YW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzNTE1NjUsImV4cCI6MjA4NzkyNzU2NX0.1k1P_IviJLaHvBK79jpUvm1uTrcLY01umYJsGerLq2Y";
 
-if(!window.supabase){
-  console.error("Supabase CDN não carregou.");
-}
-
-const { createClient } = window.supabase;
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* =========================
-   HELPERS
+   STATE
 ========================= */
-const $ = (id)=>document.getElementById(id);
+let pacientes = [];
+let realtimeChannel = null;
+const alarmTimers = {}; // por id
+let titleBlink = null;
+
+const $ = (id) => document.getElementById(id);
 function nowISO(){ return new Date().toISOString(); }
 function hhmm(d){ return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}); }
 
-function intervaloPorCor(c){
-  if(c==="red") return 10;
-  if(c==="orange") return 30;
-  if(c==="yellow") return 60;
-  if(c==="green") return 120;
-  return 60;
-}
+function setStatus(t){ $("statusLinha").textContent = "Status: " + t; }
 
-/* =========================
-   CONDUTA (ordenada + responsiva)
-========================= */
-const mapaCondutas = {
-  1:"Sintomáticos",
-  2:"Exames laboratoriais",
-  3:"Exames de imagem",
-  4:"Reavaliação",
-  5:"Internação",
-  6:"Alta após atendimento",
-  7:"Prescrição para uso domiciliar",
-  8:"Encaminhamento"
-};
-
-const condutaItens = [
-  { id:1, label: mapaCondutas[1] },
-  { id:2, label: mapaCondutas[2] },
-  { id:3, label: mapaCondutas[3] },
-  { id:4, label: mapaCondutas[4] },
-  { id:5, label: mapaCondutas[5] },
-  { id:6, label: mapaCondutas[6] },
-  { id:7, label: mapaCondutas[7] },
-  { id:8, label: mapaCondutas[8] }
-];
-
-function renderCondutaChecklist(){
-  const box = $("condutaChecklist");
-  box.innerHTML = "";
-  condutaItens.forEach(item=>{
-    const lab = document.createElement("label");
-    lab.innerHTML = `<input type="checkbox" data-id="${item.id}"> <span>${item.label}</span>`;
-    lab.addEventListener("change", ()=>{
-      lab.classList.toggle("checked", lab.querySelector("input").checked);
-    });
-    box.appendChild(lab);
-  });
-}
-
-function getCondutaSelecionada(){
-  const ids = [...document.querySelectorAll("#condutaChecklist input:checked")]
-    .map(x=>parseInt(x.dataset.id,10))
-    .sort((a,b)=>a-b);
-  return ids;
-}
-
-function setCondutaSelecionada(ids){
-  const set = new Set((ids||[]).map(n=>parseInt(n,10)));
-  [...document.querySelectorAll("#condutaChecklist label")].forEach(lab=>{
-    const inp = lab.querySelector("input");
-    const id = parseInt(inp.dataset.id,10);
-    inp.checked = set.has(id);
-    lab.classList.toggle("checked", inp.checked);
-  });
+function escapeHtml(str){
+  return (str ?? "").toString()
+    .replaceAll("&","&amp;").replaceAll("<","&lt;")
+    .replaceAll(">","&gt;").replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 }
 
 /* =========================
    DEFAULTS (pré-preenchidos)
 ========================= */
-function applyDefaultsIfEmpty(){
-  if(!($("antecedentes").value||"").trim()){
+function ensureDefaults(){
+  if(!$("antecedentes").value.trim()){
     $("antecedentes").value =
 `Comorbidades:
-Muc:
+MUC:
 Alergia:
 Cirurgias prévias:`;
   }
 
-  if(!($("sv").value||"").trim()){
-    $("sv").value = `FC:  bpm | PA:  mmHG | SatO2:  % | FR:  irpm`;
+  if(!$("sv").value.trim()){
+    $("sv").value = "FC:  bpm | PA:  mmHG | SatO2:  % | FR:  irpm";
   }
 
-  if(!($("ef").value||"").trim()){
+  if(!$("ef").value.trim()){
     $("ef").value =
 `GERAL: BOM ESTADO GERAL, LÚCIDO, ORIENTADO, HIDRATADO, CORADO, AFEBRIL.
 AR: MV PRESENTE BILATERALMENTE, SEM RUÍDOS ADVENTÍCIOS.
@@ -443,435 +352,361 @@ NEURO: SEM DÉFICITS FOCAIS.`;
 }
 
 /* =========================
-   STATE
+   CONDUTA (ordenável por regra)
 ========================= */
-let pacientes = [];            // lista vinda do banco
-let realtimeChannel = null;
-const alarmTimers = {};        // { [id]: intervalId }
+const CONDUTA_ITEMS = [
+  { id:"sint",  label:"Sintomáticos", order:1 },
+  { id:"lab",   label:"Exames laboratoriais", order:2 },
+  { id:"img",   label:"Exames de imagem", order:3 },
+  { id:"reav",  label:"Reavaliação", order:4 },
+  { id:"inter", label:"Internação", order:5 },
+  { id:"alta",  label:"Alta após atendimento", order:6 },
+  { id:"rxdom", label:"Prescrição para uso domiciliar", order:7 },
+  { id:"enc",   label:"Encaminhamento", order:8 },
+];
 
-/* =========================
-   DATABASE
-   Tabela "pacientes" esperada:
-   - id (uuid/serial)
-   - created_at (timestamp default now)
-   - name (text)
-   - hd (text)
-   - dados_json (jsonb)
-   - alta (bool)
-   - alta_at (timestamp)
-========================= */
-async function carregarPacientes(){
-  const { data, error } = await supabaseClient
-    .from("pacientes")
-    .select("*")
-    .order("created_at",{ascending:false});
+function buildCondutaChecklist(){
+  const wrap = $("condutaChecklist");
+  wrap.innerHTML = "";
 
-  if(error){
-    console.error(error);
-    $("statusLinha").textContent = "Status: erro ao carregar (veja console)";
-    return;
-  }
+  CONDUTA_ITEMS.forEach(item=>{
+    const lbl = document.createElement("label");
+    lbl.setAttribute("data-id", item.id);
+    lbl.innerHTML = `<input type="checkbox" id="cd_${item.id}"><span>${item.label}</span>`;
+    wrap.appendChild(lbl);
 
-  pacientes = data || [];
-  render();
-}
-
-async function salvarPacienteBanco(obj){
-  // obj = dados_json completo
-  const payload = {
-    name: obj.nome,
-    hd: obj.hd || "",
-    dados_json: obj,
-    alta: !!obj.alta,
-    alta_at: obj.alta_at || null
-  };
-
-  const { data, error } = await supabaseClient
-    .from("pacientes")
-    .insert([payload])
-    .select();
-
-  if(error){
-    console.error(error);
-    $("statusLinha").textContent = "Status: erro ao salvar (veja console)";
-    return null;
-  }
-
-  return data?.[0] || null;
-}
-
-async function atualizarPacienteBanco(rowId, obj){
-  const payload = {
-    name: obj.nome,
-    hd: obj.hd || "",
-    dados_json: obj,
-    alta: !!obj.alta,
-    alta_at: obj.alta_at || null
-  };
-
-  const { error } = await supabaseClient
-    .from("pacientes")
-    .update(payload)
-    .eq("id", rowId);
-
-  if(error){
-    console.error(error);
-    $("statusLinha").textContent = "Status: erro ao atualizar (veja console)";
-    return false;
-  }
-  return true;
-}
-
-async function deletarPacienteBanco(rowId){
-  const { error } = await supabaseClient
-    .from("pacientes")
-    .delete()
-    .eq("id", rowId);
-
-  if(error){
-    console.error(error);
-    $("statusLinha").textContent = "Status: erro ao deletar (veja console)";
-    return false;
-  }
-  return true;
-}
-
-/* =========================
-   FORM -> OBJ
-========================= */
-function readForm(){
-  const qp = ($("qp").value||"").trim();
-  const hda = ($("hda").value||"").trim();
-  const antecedentes = ($("antecedentes").value||"").trim();
-  const sv = ($("sv").value||"").trim();
-  const ef = ($("ef").value||"").trim();
-  const hd = ($("hd").value||"").trim();
-  const cor = $("cor").value;
-
-  const condutaIds = getCondutaSelecionada();
-  const condutaLivre = ($("condutaLivre").value||"").trim();
-
-  return {
-    nome: qp || "SEM QP",
-    qp,
-    hda,
-    antecedentes,
-    sv,
-    conduta: condutaIds,       // array [1..8]
-    condutaLivre,
-    ef,
-    hd,
-    cor
-  };
-}
-
-function clearForm(){
-  $("qp").value="";
-  $("hda").value="";
-  $("hd").value="";
-  $("condutaLivre").value="";
-  setCondutaSelecionada([]);
-  $("cor").value="yellow";
-  // mantém os prefill
-  applyDefaultsIfEmpty();
-}
-
-/* =========================
-   EXPORT (TXTBOX)
-========================= */
-function exportTexto(pObj){
-  const condFix = (pObj.conduta||[])
-    .map(n=>mapaCondutas[n])
-    .filter(Boolean)
-    .join("\n");
-
-  const condFinal = [condFix, (pObj.condutaLivre||"")].filter(Boolean).join("\n\n") || "-";
-
-  return `#ANAMNESE
-QUEIXA PRINCIPAL: ${pObj.qp || "-"}
-HDA: ${pObj.hda || "-"}
-
----
-#ANTECEDENTES
-${pObj.antecedentes || "-"}
-
----
-#SINAIS VITAIS
-${pObj.sv || "-"}
-
----
-#CONDUTA
-${condFinal}
-
----
-#EXAME FÍSICO
-${pObj.ef || "-"}
-
----
-#HIPÓTESE DIAGNÓSTICA
-${pObj.hd || "-"}`;
-}
-
-function showExport(text){
-  $("exportText").value = text || "";
-  $("exportArea").style.display = "block";
-  $("exportArea").scrollIntoView({behavior:"smooth", block:"start"});
-}
-function hideExport(){
-  $("exportArea").style.display = "none";
-}
-
-/* =========================
-   ALARME
-========================= */
-function startAlarm(id){
-  if(alarmTimers[id]) return;
-  const audio = $("alertSound");
-  try{ audio.play(); }catch(e){}
-
-  alarmTimers[id] = setInterval(()=>{
-    try{ audio.play(); }catch(e){}
-  }, 15000);
-}
-function stopAlarm(id){
-  if(!alarmTimers[id]) return;
-  clearInterval(alarmTimers[id]);
-  delete alarmTimers[id];
-}
-
-/* =========================
-   CRUD ACTIONS (UI)
-========================= */
-async function onSalvar(){
-  $("statusLinha").textContent = "Status: salvando...";
-  const base = readForm();
-
-  // regra: se "Alta após atendimento" marcado -> já entra como alta
-  const isAlta = (base.conduta||[]).includes(6);
-  base.alta = !!isAlta;
-  base.alta_at = isAlta ? nowISO() : null;
-
-  // próxima reav apenas se NÃO alta
-  const mins = intervaloPorCor(base.cor);
-  base.prox = base.alta ? null : new Date(Date.now() + mins*60000).toISOString();
-
-  const inserted = await salvarPacienteBanco(base);
-  if(inserted){
-    $("statusLinha").textContent = "Status: salvo ✅";
-    clearForm();
-    await carregarPacientes();
-  }else{
-    $("statusLinha").textContent = "Status: falhou ao salvar ❌";
-  }
-}
-
-async function onAlta(rowId){
-  const row = pacientes.find(x=>x.id===rowId);
-  if(!row) return;
-
-  // NÃO duplicar: apenas UPDATE na mesma linha
-  const obj = row.dados_json || {};
-  obj.alta = true;
-  obj.alta_at = nowISO();
-  obj.prox = null;
-
-  stopAlarm(rowId);
-
-  $("statusLinha").textContent = "Status: dando alta...";
-  const ok = await atualizarPacienteBanco(rowId, obj);
-  if(ok){
-    $("statusLinha").textContent = "Status: alta ✅";
-    await carregarPacientes();
-  }
-}
-
-async function onDeletar(rowId){
-  if(!confirm("Deletar esse paciente?")) return;
-  stopAlarm(rowId);
-  $("statusLinha").textContent = "Status: deletando...";
-  const ok = await deletarPacienteBanco(rowId);
-  if(ok){
-    $("statusLinha").textContent = "Status: deletado ✅";
-    await carregarPacientes();
-  }
-}
-
-async function onSalvarReav(rowId){
-  const row = pacientes.find(x=>x.id===rowId);
-  if(!row) return;
-
-  const box = $("reavtext-"+rowId);
-  const texto = (box?.value||"").trim();
-  if(!texto){
-    alert("Digite algo na reavaliação.");
-    return;
-  }
-
-  const obj = row.dados_json || {};
-  if(obj.alta){
-    alert("Paciente já está de alta.");
-    return;
-  }
-
-  obj.reavs = Array.isArray(obj.reavs) ? obj.reavs : [];
-  obj.reavs.unshift({
-    at: nowISO(),
-    text: texto
+    const cb = lbl.querySelector("input");
+    cb.addEventListener("change", ()=>{
+      lbl.classList.toggle("checked", cb.checked);
+    });
   });
+}
 
-  // reprograma próxima reav (mesma regra por cor)
-  const mins = intervaloPorCor(obj.cor || "yellow");
-  obj.prox = new Date(Date.now() + mins*60000).toISOString();
-
-  stopAlarm(rowId);
-
-  $("statusLinha").textContent = "Status: salvando reav...";
-  const ok = await atualizarPacienteBanco(rowId, obj);
-  if(ok){
-    $("statusLinha").textContent = "Status: reav salva ✅";
-    await carregarPacientes();
+function getCondutaSelecionada(){
+  const selected = [];
+  for(const it of CONDUTA_ITEMS){
+    const cb = document.getElementById("cd_"+it.id);
+    if(cb && cb.checked){
+      selected.push(it);
+    }
   }
+  selected.sort((a,b)=>a.order-b.order);
+  return selected.map(x=>x.label);
 }
 
 /* =========================
-   RENDER LISTA
+   TIMER / REAV
 ========================= */
+function intervaloPorCor(c){
+  if(c==="red") return 10;
+  if(c==="orange") return 30;
+  if(c==="yellow") return 60;
+  if(c==="green") return 120;
+  return 60;
+}
+
 function countdownInfo(proxISO){
-  if(!proxISO) return { text:"-", cls:"cd-ok", overdue:false, diff:0 };
-
   const prox = new Date(proxISO).getTime();
-  const now = Date.now();
-  const diff = prox - now;
-
-  if(diff <= 0){
-    return { text:"ATRASADO", cls:"cd-late", overdue:true, diff };
-  }
-
+  const diff = prox - Date.now();
+  if(diff <= 0) return { text:"ATRASADO", cls:"cd-late", overdue:true, diff };
   const min = Math.floor(diff/60000);
   const sec = Math.floor((diff%60000)/1000);
   const cls = diff < 10*60000 ? "cd-warn" : "cd-ok";
   return { text:`${min}m ${sec}s`, cls, overdue:false, diff };
 }
 
-function escapeHtml(str){
-  return (str||"").toString()
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
+function startAlarm(id, nome){
+  if(alarmTimers[id]) return;
+  const audio = $("alertSound");
+  try{ audio.play(); }catch(e){}
+  alarmTimers[id] = setInterval(()=>{ try{ audio.play(); }catch(e){} }, 15000);
+  startBlink();
 }
 
+function stopAlarm(id){
+  if(!alarmTimers[id]) return;
+  clearInterval(alarmTimers[id]);
+  delete alarmTimers[id];
+  if(Object.keys(alarmTimers).length === 0) stopBlink();
+}
+
+function startBlink(){
+  if(titleBlink) return;
+  titleBlink = setInterval(()=>{
+    document.title = (document.title === "🚨 REAV ATRASADA") ? "REAV SMART" : "🚨 REAV ATRASADA";
+  }, 900);
+}
+function stopBlink(){
+  if(titleBlink){
+    clearInterval(titleBlink);
+    titleBlink = null;
+  }
+  document.title = "REAV SMART";
+}
+
+/* =========================
+   DATABASE
+========================= */
+async function carregarPacientes(){
+  const { data, error } = await supabaseClient
+    .from("pacientes")
+    .select("*")
+    .order("created_at", { ascending:false });
+
+  if(error){
+    console.error(error);
+    setStatus("erro ao carregar (console)");
+    return;
+  }
+
+  pacientes = (data || []).map(row=>{
+    const dj = row.dados_json || {};
+    return {
+      id: row.id,
+      name: row.name ?? dj.nome ?? "SEM QP",
+      hd: row.hd ?? dj.hd ?? "",
+      dados_json: dj,
+      alta: !!row.alta,
+      alta_at: row.alta_at || null,
+      created_at: row.created_at || dj.created_at || nowISO(),
+      prox: dj.prox || row.prox || dj.prox,
+    };
+  });
+
+  render();
+}
+
+async function salvarPacienteBanco(payload){
+  // INSERT
+  const { data, error } = await supabaseClient
+    .from("pacientes")
+    .insert([{
+      name: payload.nome,
+      hd: payload.hd,
+      dados_json: payload,
+      alta: payload.alta || false
+    }])
+    .select();
+
+  if(error){
+    console.error(error);
+    setStatus("erro ao salvar (console)");
+    return null;
+  }
+  return data?.[0]?.id || null;
+}
+
+async function deletarPacienteBanco(id){
+  const { error } = await supabaseClient.from("pacientes").delete().eq("id", id);
+  if(error) console.error(error);
+}
+
+async function darAltaBanco(id){
+  const { error } = await supabaseClient
+    .from("pacientes")
+    .update({ alta:true, alta_at: nowISO() })
+    .eq("id", id);
+  if(error) console.error(error);
+}
+
+/* =========================
+   CRUD
+========================= */
+async function addPaciente(){
+  const nome = ($("qp").value || "").trim() || "SEM QP";
+  const hda = ($("hda").value || "").trim();
+  const antecedentes = ($("antecedentes").value || "").trim();
+  const sv = ($("sv").value || "").trim();
+  const ef = ($("ef").value || "").trim();
+  const hd = ($("hd").value || "").trim();
+  const cor = $("cor").value;
+
+  const condLista = getCondutaSelecionada();
+  const condLivre = ($("condutaLivre").value || "").trim();
+  const condutaFinal = [...condLista];
+  if(condLivre) condutaFinal.push(condLivre);
+
+  const created = nowISO();
+  const prox = new Date(Date.now() + intervaloPorCor(cor)*60000).toISOString();
+
+  const payload = {
+    nome,
+    qp: nome,
+    hda,
+    antecedentes,
+    sv,
+    ef,
+    hd,
+    conduta: condutaFinal,      // array de strings (já ordenado)
+    conduta_livre: condLivre,
+    cor,
+    created_at: created,
+    prox,
+    alta: false,
+    alta_at: null
+  };
+
+  setStatus("salvando...");
+  const newId = await salvarPacienteBanco(payload);
+  if(!newId) return;
+
+  limparForm();
+  setStatus("salvo");
+  await carregarPacientes();
+}
+
+function limparForm(){
+  $("qp").value = "";
+  $("hda").value = "";
+  $("hd").value = "";
+  $("cor").value = "yellow";
+  $("condutaLivre").value = "";
+
+  // desmarca checklist
+  CONDUTA_ITEMS.forEach(it=>{
+    const cb = document.getElementById("cd_"+it.id);
+    if(cb) cb.checked = false;
+    const lbl = document.querySelector(`[data-id="${it.id}"]`);
+    if(lbl) lbl.classList.remove("checked");
+  });
+
+  // mantém defaults em antecedentes/sv/ef (não apaga)
+  ensureDefaults();
+}
+
+/* =========================
+   EXPORT
+========================= */
+function montarTextoExport(p){
+  const dj = p.dados_json || {};
+  const qp = dj.qp || p.name || "-";
+  const hda = dj.hda || "-";
+  const ant = dj.antecedentes || "-";
+  const sv = dj.sv || "-";
+  const ef = dj.ef || "-";
+  const hd = dj.hd || p.hd || "-";
+
+  const condArr = Array.isArray(dj.conduta) ? dj.conduta : [];
+  const condTxt = condArr.length ? condArr.join(", ") : "-";
+
+  // ordem final pedida:
+  // QP + HDA + ANTECEDENTES + SV + EF + HD + CONDUTA
+  return `#ANAMNESE
+QUEIXA PRINCIPAL: ${qp}
+HDA: ${hda}
+
+---
+#ANTECEDENTES
+${ant}
+
+---
+#SINAIS VITAIS
+${sv}
+
+---
+#EXAME FÍSICO
+${ef}
+
+---
+#HIPÓTESE DIAGNÓSTICA
+${hd}
+
+---
+#CONDUTA
+${condTxt}`;
+}
+
+function showExport(text){
+  $("exportText").value = text;
+  $("exportArea").style.display = "block";
+  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+}
+
+$("btnFecharExport").addEventListener("click", ()=>{
+  $("exportArea").style.display = "none";
+});
+
+/* =========================
+   LIST ACTIONS
+========================= */
+async function acaoAlta(id){
+  stopAlarm(id);
+  await darAltaBanco(id);
+  await carregarPacientes();
+}
+
+async function acaoDelete(id){
+  stopAlarm(id);
+  await deletarPacienteBanco(id);
+  await carregarPacientes();
+}
+
+function acaoExport(id){
+  const p = pacientes.find(x=>x.id===id);
+  if(!p) return;
+  showExport(montarTextoExport(p));
+}
+
+/* =========================
+   RENDER
+========================= */
 function render(){
   $("countPacientes").textContent = `(${pacientes.length})`;
-
   const div = $("lista");
   div.innerHTML = "";
 
-  // ordenação: atrasados (ativos) primeiro, depois por horário prox
-  const arr = [...pacientes].sort((a,b)=>{
-    const ao = !a.alta && a.dados_json?.prox && (new Date(a.dados_json.prox).getTime() <= Date.now());
-    const bo = !b.alta && b.dados_json?.prox && (new Date(b.dados_json.prox).getTime() <= Date.now());
+  // ordenar: atrasados (ativos) primeiro, depois por prox
+  const sorted = [...pacientes].sort((a,b)=>{
+    const ao = !a.alta && (new Date(a.dados_json?.prox || a.prox).getTime() <= Date.now());
+    const bo = !b.alta && (new Date(b.dados_json?.prox || b.prox).getTime() <= Date.now());
     if(ao !== bo) return ao ? -1 : 1;
-
-    const ap = a.dados_json?.prox ? new Date(a.dados_json.prox).getTime() : Infinity;
-    const bp = b.dados_json?.prox ? new Date(b.dados_json.prox).getTime() : Infinity;
-    return ap - bp;
+    return new Date(a.dados_json?.prox || a.prox).getTime() - new Date(b.dados_json?.prox || b.prox).getTime();
   });
 
-  arr.forEach(row=>{
-    const obj = row.dados_json || {};
-    const nome = row.name || obj.nome || "SEM NOME";
-    const hd = row.hd || obj.hd || "-";
-    const proxISO = obj.prox || null;
+  let anyOverdue = false;
 
+  sorted.forEach(p=>{
+    const dj = p.dados_json || {};
+    const proxISO = dj.prox || p.prox || nowISO();
+    const prox = new Date(proxISO);
     const cd = countdownInfo(proxISO);
-    const overdueActive = (!row.alta && cd.overdue);
 
-    // alarme só se atrasado e não alta
-    if(overdueActive) startAlarm(row.id);
-    else stopAlarm(row.id);
+    const overdueActive = (!p.alta) && cd.overdue;
+    if(overdueActive) anyOverdue = true;
+
+    if(overdueActive) startAlarm(p.id, p.name);
+    else stopAlarm(p.id);
 
     const card = document.createElement("div");
-    card.className = "patient";
-    if(overdueActive) card.classList.add("overdue");
+    card.className = "patient" + (overdueActive ? " overdue" : "");
 
-    const nameClass = row.alta ? "pname strike" : "pname";
-    const proxStr = proxISO ? hhmm(new Date(proxISO)) : "-";
-
-    // reav history (simples)
-    const reavs = Array.isArray(obj.reavs) ? obj.reavs : [];
-    const lastReav = reavs[0] ? `Última reav: ${hhmm(new Date(reavs[0].at))}` : "Última reav: -";
+    const nameCls = p.alta ? "pname strike" : "pname";
 
     card.innerHTML = `
       <div class="patient-top">
         <div>
-          <div class="${nameClass}">${escapeHtml(nome)}</div>
+          <div class="${nameCls}">${escapeHtml(p.name)}</div>
           <div class="meta">
-            Próx. reav: <b>${proxStr}</b>
-            ${(!row.alta && proxISO) ? ` <span class="cd ${cd.cls}">${cd.text}</span>` : ""}
+            Próx reav: <b>${hhmm(prox)}</b>
+            ${!p.alta ? ` <span class="cd ${cd.cls}">${cd.text}</span>` : ``}
             <br>
-            ${escapeHtml(lastReav)}
-            <br>
-            HD: ${escapeHtml(hd)}
+            HD: ${escapeHtml(p.hd || dj.hd || "-")}
           </div>
         </div>
 
         <div class="actions">
-          <button class="secondary" data-act="export">Exportar</button>
-          ${row.alta ? "" : `<button class="warn" data-act="reav">Reavaliar</button>`}
-          ${row.alta ? "" : `<button class="success" data-act="alta">Alta</button>`}
-          <button class="danger" data-act="del">Deletar</button>
+          <button class="secondary" onclick="acaoExport('${p.id}')">Exportar</button>
+          ${p.alta ? `` : `<button class="success" onclick="acaoAlta('${p.id}')">Alta</button>`}
+          <button class="danger" onclick="acaoDelete('${p.id}')">Deletar</button>
         </div>
       </div>
-
-      <div id="reavbox-${row.id}"></div>
     `;
-
-    // ações
-    card.querySelector('[data-act="export"]').addEventListener("click", ()=>{
-      showExport(exportTexto(obj));
-    });
-
-    const btnReav = card.querySelector('[data-act="reav"]');
-    if(btnReav){
-      btnReav.addEventListener("click", ()=>{
-        const box = $("reavbox-"+row.id);
-        if(!box) return;
-
-        // toggle
-        if(box.innerHTML.trim()){
-          box.innerHTML = "";
-          return;
-        }
-
-        box.innerHTML = `
-          <div class="reavbox">
-            <div class="small" style="margin-bottom:8px;">
-              REAVALIADO ÀS <b>${hhmm(new Date())}</b>
-            </div>
-            <textarea id="reavtext-${row.id}" placeholder="Achados da reavaliação..."></textarea>
-            <div class="row" style="margin-top:10px;">
-              <button class="success" id="btnSaveReav-${row.id}">Salvar reav</button>
-              <button class="secondary" id="btnCloseReav-${row.id}">Fechar</button>
-            </div>
-          </div>
-        `;
-
-        $("btnSaveReav-"+row.id).addEventListener("click", ()=>onSalvarReav(row.id));
-        $("btnCloseReav-"+row.id).addEventListener("click", ()=>{ box.innerHTML=""; });
-      });
-    }
-
-    const btnAlta = card.querySelector('[data-act="alta"]');
-    if(btnAlta){
-      btnAlta.addEventListener("click", ()=>onAlta(row.id));
-    }
-
-    card.querySelector('[data-act="del"]').addEventListener("click", ()=>onDeletar(row.id));
 
     div.appendChild(card);
   });
+
+  if(anyOverdue) startBlink();
+  else if(Object.keys(alarmTimers).length === 0) stopBlink();
 }
 
 /* =========================
@@ -881,7 +716,7 @@ function initRealtime(){
   if(realtimeChannel) return;
 
   realtimeChannel = supabaseClient
-    .channel("realtime-pacientes")
+    .channel("realtime")
     .on("postgres_changes",
       { event:"*", schema:"public", table:"pacientes" },
       ()=> carregarPacientes()
@@ -890,31 +725,19 @@ function initRealtime(){
 }
 
 /* =========================
-   EVENTS
-========================= */
-$("btnSalvar").addEventListener("click", onSalvar);
-$("btnLimpar").addEventListener("click", clearForm);
-$("btnFecharExport").addEventListener("click", hideExport);
-
-// destaca visualmente labels marcados
-document.addEventListener("change", (e)=>{
-  if(e.target && e.target.matches("#condutaChecklist input[type='checkbox']")){
-    const lab = e.target.closest("label");
-    if(lab) lab.classList.toggle("checked", e.target.checked);
-  }
-});
-
-/* =========================
    BOOT
 ========================= */
-renderCondutaChecklist();
-applyDefaultsIfEmpty();
+$("btnSalvar").addEventListener("click", addPaciente);
+$("btnLimpar").addEventListener("click", ()=>{ limparForm(); setStatus("limpo"); });
+
+buildCondutaChecklist();
+ensureDefaults();
+
 initRealtime();
 carregarPacientes();
 
-// countdown/alarme em tempo real
+// atualiza contagem regressiva / alarmes
 setInterval(render, 1000);
 </script>
-
 </body>
 </html>
