@@ -5,154 +5,365 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>REAV SMART</title>
 
+<!-- SUPABASE CDN -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
 <style>
 :root{
-  --bg:#0f172a;
-  --card:#1e293b;
-  --text:#e2e8f0;
-  --muted:#94a3b8;
+  --bg:#05070c;
+  --panel:#0b1020;
+  --card:#0a0f1a;
+  --text:#e6edf6;
+  --muted:#9aa7b2;
+  --border:#1f2a44;
   --btn:#2563eb;
+  --btn2:#475569;
   --danger:#dc2626;
   --success:#16a34a;
-  --border:#334155;
+  --warn:#f59e0b;
+  --late:#ef4444;
+
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
 }
 
+*{ box-sizing:border-box; }
+
 body{
-  font-family:'Inter',sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  padding:20px;
   margin:0;
+  padding:14px;
+  font-family: var(--sans);
+  background: radial-gradient(1200px 700px at 30% 0%, #0c1534 0%, var(--bg) 60%);
+  color: var(--text);
+}
+
+h2{ margin:0 0 6px 0; letter-spacing:.5px; }
+.sub{ color:var(--muted); font-size:12px; margin-bottom:12px; }
+
+.wrap{
+  max-width: 980px;
+  margin: 0 auto;
 }
 
 .card{
-  background:var(--card);
-  padding:15px;
-  border-radius:12px;
-  margin-bottom:15px;
-  border:1px solid var(--border);
+  background: rgba(11,16,32,.82);
+  border: 1px solid rgba(31,42,68,.85);
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.25);
+  margin-bottom: 12px;
+  backdrop-filter: blur(10px);
+}
+
+label.title{
+  display:block;
+  font-weight:800;
+  margin: 10px 0 6px;
+  letter-spacing:.4px;
 }
 
 input, textarea, select{
   width:100%;
-  margin:6px 0;
-  padding:10px;
-  background:#0f172a;
-  color:var(--text);
-  border:1px solid var(--border);
-  border-radius:10px;
+  background: rgba(10,15,26,.92);
+  color: var(--text);
+  border: 1px solid rgba(31,42,68,.9);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
 }
 
-textarea{ min-height:80px; }
+textarea{
+  min-height: 70px;
+  resize: vertical;
+  font-family: var(--mono);
+}
+
+.small{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:6px;
+}
+
+.row{
+  display:flex;
+  gap:10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.grow{ flex:1; min-width: 240px; }
 
 button{
-  padding:10px;
-  margin:5px 5px 5px 0;
-  cursor:pointer;
-  border:none;
-  border-radius:8px;
-  font-weight:600;
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-weight: 800;
+  cursor: pointer;
+  color: #fff;
+  background: var(--btn);
 }
 
-button.primary{ background:var(--btn); color:white; }
-button.danger{ background:var(--danger); color:white; }
-button.success{ background:var(--success); color:white; }
+button.secondary{ background: var(--btn2); }
+button.danger{ background: var(--danger); }
+button.success{ background: var(--success); }
+button.warn{ background: var(--warn); color:#111827; }
 
-.checklist{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+button:active{ transform: translateY(1px); }
+
+hr.sep{
+  border:0;
+  border-top:1px dashed rgba(31,42,68,.9);
+  margin: 12px 0;
+}
+
+/* ===== CONDUTA RESPONSIVA ===== */
+.conduta-checklist{
+  display:flex;
+  flex-direction:column;
   gap:8px;
-  margin-top:10px;
+  margin-top: 6px;
 }
 
-.checklist label{
-  background:#0f172a;
-  border:1px solid var(--border);
-  padding:8px;
-  border-radius:8px;
-  cursor:pointer;
+.conduta-checklist label{
   display:flex;
   align-items:center;
-  gap:6px;
+  gap:12px;
+  padding:12px;
+  border:1px solid rgba(31,42,68,.9);
+  border-radius:12px;
+  background: rgba(10,15,26,.92);
+  cursor:pointer;
+  font-size:15px;
+  line-height:1.2;
 }
 
-.alta{
-  text-decoration:line-through;
-  opacity:.5;
+.conduta-checklist input{
+  width:22px;
+  height:22px;
+  accent-color: #60a5fa;
+}
+
+.conduta-checklist label.checked{
+  border-color: rgba(96,165,250,.8);
+  box-shadow: 0 0 0 3px rgba(96,165,250,.12) inset;
+}
+
+@media(min-width:768px){
+  .conduta-checklist{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+  }
+}
+
+/* ===== LISTA ===== */
+.patient{
+  background: rgba(10,15,26,.92);
+  border: 1px solid rgba(31,42,68,.9);
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+.patient-top{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+  flex-wrap: wrap;
+}
+
+.pname{
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: .3px;
+}
+
+.pname.strike{ text-decoration: line-through; opacity: .65; }
+
+.meta{
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(31,42,68,.9);
+  background: rgba(11,16,32,.85);
+}
+
+.cd{
+  display:inline-block;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-weight: 900;
+  margin-left: 6px;
+}
+
+.cd-ok{ background: rgba(22,163,74,.15); color: #86efac; }
+.cd-warn{ background: rgba(245,158,11,.15); color: #fde68a; }
+.cd-late{ background: rgba(239,68,68,.16); color: #fecaca; }
+
+.overdue{
+  border-color: rgba(239,68,68,.75);
+  box-shadow: 0 0 0 3px rgba(239,68,68,.12) inset;
+}
+
+.actions{
+  display:flex;
+  gap:8px;
+  flex-wrap: wrap;
+  justify-content:flex-end;
+}
+
+.actions button{
+  padding: 9px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.reavbox{
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(31,42,68,.9);
+  background: rgba(11,16,32,.7);
+}
+
+.reavbox textarea{
+  min-height: 90px;
+}
+
+/* ===== TXT BOX ===== */
+#exportArea{
+  display:none;
+}
+
+.export-box{
+  min-height: 280px;
+  font-family: var(--mono);
+}
+
+/* ===== MOBILE FIXES ===== */
+@media(max-width:420px){
+  body{ padding: 10px; }
+  .grow{ min-width: 100%; }
+  .actions{ justify-content: flex-start; }
 }
 </style>
 </head>
 
 <body>
+<div class="wrap">
+  <h2>REAV SMART</h2>
+  <div class="sub">Multi-dispositivo (Supabase) • Reavaliação • Export TXTBOX • Dark mode</div>
 
-<h2>REAV SMART</h2>
+  <!-- FORM -->
+  <div class="card">
+    <label class="title">#ANAMNESE</label>
+    <input id="qp" placeholder="QUEIXA PRINCIPAL">
+    <textarea id="hda" placeholder="HDA"></textarea>
 
-<div class="card">
+    <label class="title">#ANTECEDENTES</label>
+    <textarea id="antecedentes"></textarea>
 
-<input id="qp" placeholder="Queixa principal">
-<textarea id="hda" placeholder="HDA"></textarea>
+    <label class="title">#SINAIS VITAIS</label>
+    <textarea id="sv"></textarea>
 
-<textarea id="ant">
-Comorbidades:
-MUC:
-Alergia:
-Cirurgias prévias:
-</textarea>
+    <label class="title">#CONDUTA</label>
+    <div class="conduta-checklist" id="condutaChecklist"></div>
+    <textarea id="condutaLivre" placeholder="Conduta livre (opcional)..."></textarea>
 
-<textarea id="sv">
-FC:  bpm | PA:  mmHg | SatO2:  % | FR:  irpm
-</textarea>
+    <label class="title">#EXAME FÍSICO</label>
+    <textarea id="ef"></textarea>
 
-<textarea id="ef">GERAL: BOM ESTADO GERAL, LÚCIDO, ORIENTADO, HIDRATADO, CORADO, AFEBRIL.
-AR: MV PRESENTE BILATERALMENTE, SEM RUÍDOS ADVENTÍCIOS.
-ACV: RCR EM 2T, SEM SOPROS.
-ABD: PLANO, FLÁCIDO, INDOLOR.
-NEURO: SEM DÉFICITS FOCAIS.</textarea>
+    <label class="title">#HIPÓTESE DIAGNÓSTICA</label>
+    <textarea id="hd" placeholder="HD (1- ... 2- ...)"></textarea>
 
-<textarea id="hd" placeholder="Hipótese diagnóstica"></textarea>
+    <hr class="sep">
 
-<h4>Conduta</h4>
-<div class="checklist">
-<label><input type="checkbox" value="1"> Sintomáticos</label>
-<label><input type="checkbox" value="2"> Exames laboratoriais</label>
-<label><input type="checkbox" value="3"> Exames de imagem</label>
-<label><input type="checkbox" value="4"> Reavaliação</label>
-<label><input type="checkbox" value="5"> Internação</label>
-<label><input type="checkbox" value="6"> Alta após atendimento</label>
-<label><input type="checkbox" value="7"> Prescrição domiciliar</label>
-<label><input type="checkbox" value="8"> Encaminhamento</label>
+    <div class="row">
+      <select id="cor" class="grow">
+        <option value="red">🔴 10 min</option>
+        <option value="orange">🟠 30 min</option>
+        <option value="yellow" selected>🟡 60 min</option>
+        <option value="green">🟢 120 min</option>
+      </select>
+
+      <button id="btnSalvar" class="grow">Salvar</button>
+      <button id="btnLimpar" class="secondary">Limpar</button>
+    </div>
+
+    <div class="small" id="statusLinha">Status: pronto</div>
+  </div>
+
+  <!-- LISTA -->
+  <div class="card">
+    <div class="row" style="justify-content:space-between;">
+      <b>Atendimentos</b>
+      <span class="small" id="countPacientes">(0)</span>
+    </div>
+    <div id="lista"></div>
+  </div>
+
+  <!-- TXTBOX -->
+  <div class="card" id="exportArea">
+    <div class="row" style="justify-content:space-between;">
+      <b>TXT BOX</b>
+      <div class="row">
+        <button id="btnFecharExport" class="secondary">Fechar</button>
+      </div>
+    </div>
+    <textarea id="exportText" class="export-box"></textarea>
+    <div class="small">Dica: você pode selecionar e copiar manualmente.</div>
+  </div>
+
+  <audio id="alertSound">
+    <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg">
+  </audio>
+
 </div>
-
-<select id="cor">
-<option value="red">🔴 10 min</option>
-<option value="orange">🟠 30 min</option>
-<option value="yellow" selected>🟡 60 min</option>
-<option value="green">🟢 120 min</option>
-</select>
-
-<button class="primary" onclick="addPaciente()">Salvar</button>
-
-</div>
-
-<div id="lista"></div>
 
 <script>
-
+/* =========================
+   SUPABASE CONFIG (seu)
+========================= */
 const SUPABASE_URL = "https://qrvlpupxzvqvwcgwwamr.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFydmxwdXB4enZxdndjZ3d3YW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzNTE1NjUsImV4cCI6MjA4NzkyNzU2NX0.1k1P_IviJLaHvBK79jpUvm1uTrcLY01umYJsGerLq2Y";
 
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+if(!window.supabase){
+  console.error("Supabase CDN não carregou.");
+}
 
-let pacientes = [];
+const { createClient } = window.supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* =========================
-   MAPA CONDUTAS
+   HELPERS
 ========================= */
+const $ = (id)=>document.getElementById(id);
+function nowISO(){ return new Date().toISOString(); }
+function hhmm(d){ return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}); }
 
+function intervaloPorCor(c){
+  if(c==="red") return 10;
+  if(c==="orange") return 30;
+  if(c==="yellow") return 60;
+  if(c==="green") return 120;
+  return 60;
+}
+
+/* =========================
+   CONDUTA (ordenada + responsiva)
+========================= */
 const mapaCondutas = {
   1:"Sintomáticos",
   2:"Exames laboratoriais",
@@ -164,209 +375,546 @@ const mapaCondutas = {
   8:"Encaminhamento"
 };
 
-/* ========================= */
+const condutaItens = [
+  { id:1, label: mapaCondutas[1] },
+  { id:2, label: mapaCondutas[2] },
+  { id:3, label: mapaCondutas[3] },
+  { id:4, label: mapaCondutas[4] },
+  { id:5, label: mapaCondutas[5] },
+  { id:6, label: mapaCondutas[6] },
+  { id:7, label: mapaCondutas[7] },
+  { id:8, label: mapaCondutas[8] }
+];
 
-function intervaloPorCor(c){
-  if(c==="red") return 10;
-  if(c==="orange") return 30;
-  if(c==="yellow") return 60;
-  if(c==="green") return 120;
-  return 60;
+function renderCondutaChecklist(){
+  const box = $("condutaChecklist");
+  box.innerHTML = "";
+  condutaItens.forEach(item=>{
+    const lab = document.createElement("label");
+    lab.innerHTML = `<input type="checkbox" data-id="${item.id}"> <span>${item.label}</span>`;
+    lab.addEventListener("change", ()=>{
+      lab.classList.toggle("checked", lab.querySelector("input").checked);
+    });
+    box.appendChild(lab);
+  });
 }
 
-async function carregar(){
-  const { data } = await db
+function getCondutaSelecionada(){
+  const ids = [...document.querySelectorAll("#condutaChecklist input:checked")]
+    .map(x=>parseInt(x.dataset.id,10))
+    .sort((a,b)=>a-b);
+  return ids;
+}
+
+function setCondutaSelecionada(ids){
+  const set = new Set((ids||[]).map(n=>parseInt(n,10)));
+  [...document.querySelectorAll("#condutaChecklist label")].forEach(lab=>{
+    const inp = lab.querySelector("input");
+    const id = parseInt(inp.dataset.id,10);
+    inp.checked = set.has(id);
+    lab.classList.toggle("checked", inp.checked);
+  });
+}
+
+/* =========================
+   DEFAULTS (pré-preenchidos)
+========================= */
+function applyDefaultsIfEmpty(){
+  if(!($("antecedentes").value||"").trim()){
+    $("antecedentes").value =
+`Comorbidades:
+Muc:
+Alergia:
+Cirurgias prévias:`;
+  }
+
+  if(!($("sv").value||"").trim()){
+    $("sv").value = `FC:  bpm | PA:  mmHG | SatO2:  % | FR:  irpm`;
+  }
+
+  if(!($("ef").value||"").trim()){
+    $("ef").value =
+`GERAL: BOM ESTADO GERAL, LÚCIDO, ORIENTADO, HIDRATADO, CORADO, AFEBRIL.
+AR: MV PRESENTE BILATERALMENTE, SEM RUÍDOS ADVENTÍCIOS.
+ACV: RCR EM 2T, SEM SOPROS.
+ABD: PLANO, FLÁCIDO, INDOLOR.
+NEURO: SEM DÉFICITS FOCAIS.`;
+  }
+}
+
+/* =========================
+   STATE
+========================= */
+let pacientes = [];            // lista vinda do banco
+let realtimeChannel = null;
+const alarmTimers = {};        // { [id]: intervalId }
+
+/* =========================
+   DATABASE
+   Tabela "pacientes" esperada:
+   - id (uuid/serial)
+   - created_at (timestamp default now)
+   - name (text)
+   - hd (text)
+   - dados_json (jsonb)
+   - alta (bool)
+   - alta_at (timestamp)
+========================= */
+async function carregarPacientes(){
+  const { data, error } = await supabaseClient
     .from("pacientes")
     .select("*")
     .order("created_at",{ascending:false});
+
+  if(error){
+    console.error(error);
+    $("statusLinha").textContent = "Status: erro ao carregar (veja console)";
+    return;
+  }
 
   pacientes = data || [];
   render();
 }
 
-async function salvarNovo(p){
-  const { data } = await db
-    .from("pacientes")
-    .insert([{ dados_json:p }])
-    .select();
-
-  return data[0].id;
-}
-
-async function atualizarExistente(id, obj){
-  await db
-    .from("pacientes")
-    .update({ dados_json: obj })
-    .eq("id", id);
-}
-
-async function deletar(id){
-  await db.from("pacientes").delete().eq("id", id);
-  carregar();
-}
-
-async function addPaciente(){
-
-  const condutaSelecionada = [...document.querySelectorAll(".checklist input:checked")]
-    .map(c=>parseInt(c.value))
-    .sort((a,b)=>a-b);
-
-  const novo = {
-    nome: qp.value || "SEM QP",
-    qp: qp.value,
-    hda: hda.value,
-    antecedentes: ant.value,
-    sv: sv.value,
-    ef: ef.value,
-    hd: hd.value,
-    conduta: condutaSelecionada,
-    cor: cor.value,
-    created_at: new Date().toISOString(),
-    prox: new Date(Date.now()+intervaloPorCor(cor.value)*60000).toISOString(),
-    alta:false
+async function salvarPacienteBanco(obj){
+  // obj = dados_json completo
+  const payload = {
+    name: obj.nome,
+    hd: obj.hd || "",
+    dados_json: obj,
+    alta: !!obj.alta,
+    alta_at: obj.alta_at || null
   };
 
-  await salvarNovo(novo);
-  carregar();
+  const { data, error } = await supabaseClient
+    .from("pacientes")
+    .insert([payload])
+    .select();
+
+  if(error){
+    console.error(error);
+    $("statusLinha").textContent = "Status: erro ao salvar (veja console)";
+    return null;
+  }
+
+  return data?.[0] || null;
 }
 
-async function darAlta(id){
-  const registro = pacientes.find(p=>p.id===id);
-  if(!registro) return;
+async function atualizarPacienteBanco(rowId, obj){
+  const payload = {
+    name: obj.nome,
+    hd: obj.hd || "",
+    dados_json: obj,
+    alta: !!obj.alta,
+    alta_at: obj.alta_at || null
+  };
 
-  registro.dados_json.alta = true;
+  const { error } = await supabaseClient
+    .from("pacientes")
+    .update(payload)
+    .eq("id", rowId);
 
-  await atualizarExistente(id, registro.dados_json);
-  carregar();
+  if(error){
+    console.error(error);
+    $("statusLinha").textContent = "Status: erro ao atualizar (veja console)";
+    return false;
+  }
+  return true;
 }
 
-function tocarAlarme(){
-  const audio = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
-  audio.play();
+async function deletarPacienteBanco(rowId){
+  const { error } = await supabaseClient
+    .from("pacientes")
+    .delete()
+    .eq("id", rowId);
+
+  if(error){
+    console.error(error);
+    $("statusLinha").textContent = "Status: erro ao deletar (veja console)";
+    return false;
+  }
+  return true;
 }
 
 /* =========================
-   EXPORTAÇÃO COM TEXTBOX
+   FORM -> OBJ
 ========================= */
+function readForm(){
+  const qp = ($("qp").value||"").trim();
+  const hda = ($("hda").value||"").trim();
+  const antecedentes = ($("antecedentes").value||"").trim();
+  const sv = ($("sv").value||"").trim();
+  const ef = ($("ef").value||"").trim();
+  const hd = ($("hd").value||"").trim();
+  const cor = $("cor").value;
 
-function exportar(id){
+  const condutaIds = getCondutaSelecionada();
+  const condutaLivre = ($("condutaLivre").value||"").trim();
 
-  const registro = pacientes.find(p=>p.id===id);
-  if(!registro) return;
+  return {
+    nome: qp || "SEM QP",
+    qp,
+    hda,
+    antecedentes,
+    sv,
+    conduta: condutaIds,       // array [1..8]
+    condutaLivre,
+    ef,
+    hd,
+    cor
+  };
+}
 
-  const o = registro.dados_json;
+function clearForm(){
+  $("qp").value="";
+  $("hda").value="";
+  $("hd").value="";
+  $("condutaLivre").value="";
+  setCondutaSelecionada([]);
+  $("cor").value="yellow";
+  // mantém os prefill
+  applyDefaultsIfEmpty();
+}
 
-  const condutasTexto = (o.conduta||[])
-    .map(num => mapaCondutas[num])
+/* =========================
+   EXPORT (TXTBOX)
+========================= */
+function exportTexto(pObj){
+  const condFix = (pObj.conduta||[])
+    .map(n=>mapaCondutas[n])
+    .filter(Boolean)
     .join("\n");
 
-  const texto = `#ANAMNESE
-QP: ${o.qp}
+  const condFinal = [condFix, (pObj.condutaLivre||"")].filter(Boolean).join("\n\n") || "-";
 
-HDA:
-${o.hda}
+  return `#ANAMNESE
+QUEIXA PRINCIPAL: ${pObj.qp || "-"}
+HDA: ${pObj.hda || "-"}
 
 ---
 #ANTECEDENTES
-${o.antecedentes}
+${pObj.antecedentes || "-"}
 
 ---
 #SINAIS VITAIS
-${o.sv}
-
----
-#EXAME FÍSICO
-${o.ef}
-
----
-#HIPÓTESE DIAGNÓSTICA
-${o.hd}
+${pObj.sv || "-"}
 
 ---
 #CONDUTA
-${condutasTexto}
-`;
+${condFinal}
 
-  mostrarExport(texto);
+---
+#EXAME FÍSICO
+${pObj.ef || "-"}
+
+---
+#HIPÓTESE DIAGNÓSTICA
+${pObj.hd || "-"}`;
 }
 
-function mostrarExport(texto){
+function showExport(text){
+  $("exportText").value = text || "";
+  $("exportArea").style.display = "block";
+  $("exportArea").scrollIntoView({behavior:"smooth", block:"start"});
+}
+function hideExport(){
+  $("exportArea").style.display = "none";
+}
 
-  let modal = document.getElementById("exportModal");
+/* =========================
+   ALARME
+========================= */
+function startAlarm(id){
+  if(alarmTimers[id]) return;
+  const audio = $("alertSound");
+  try{ audio.play(); }catch(e){}
 
-  if(!modal){
-    modal = document.createElement("div");
-    modal.id = "exportModal";
-    modal.style.position="fixed";
-    modal.style.top="0";
-    modal.style.left="0";
-    modal.style.width="100%";
-    modal.style.height="100%";
-    modal.style.background="rgba(0,0,0,.7)";
-    modal.style.display="flex";
-    modal.style.justifyContent="center";
-    modal.style.alignItems="center";
-    modal.style.zIndex="9999";
+  alarmTimers[id] = setInterval(()=>{
+    try{ audio.play(); }catch(e){}
+  }, 15000);
+}
+function stopAlarm(id){
+  if(!alarmTimers[id]) return;
+  clearInterval(alarmTimers[id]);
+  delete alarmTimers[id];
+}
 
-    modal.innerHTML = `
-      <div style="width:90%;max-width:700px;background:#1e293b;padding:20px;border-radius:10px;">
-        <textarea id="exportTextArea" style="width:100%;height:400px;background:#0f172a;color:#e2e8f0;border:1px solid #334155;padding:10px;border-radius:8px;"></textarea>
-        <br><br>
-        <button onclick="fecharExport()">Fechar</button>
-      </div>
-    `;
+/* =========================
+   CRUD ACTIONS (UI)
+========================= */
+async function onSalvar(){
+  $("statusLinha").textContent = "Status: salvando...";
+  const base = readForm();
 
-    document.body.appendChild(modal);
+  // regra: se "Alta após atendimento" marcado -> já entra como alta
+  const isAlta = (base.conduta||[]).includes(6);
+  base.alta = !!isAlta;
+  base.alta_at = isAlta ? nowISO() : null;
+
+  // próxima reav apenas se NÃO alta
+  const mins = intervaloPorCor(base.cor);
+  base.prox = base.alta ? null : new Date(Date.now() + mins*60000).toISOString();
+
+  const inserted = await salvarPacienteBanco(base);
+  if(inserted){
+    $("statusLinha").textContent = "Status: salvo ✅";
+    clearForm();
+    await carregarPacientes();
+  }else{
+    $("statusLinha").textContent = "Status: falhou ao salvar ❌";
+  }
+}
+
+async function onAlta(rowId){
+  const row = pacientes.find(x=>x.id===rowId);
+  if(!row) return;
+
+  // NÃO duplicar: apenas UPDATE na mesma linha
+  const obj = row.dados_json || {};
+  obj.alta = true;
+  obj.alta_at = nowISO();
+  obj.prox = null;
+
+  stopAlarm(rowId);
+
+  $("statusLinha").textContent = "Status: dando alta...";
+  const ok = await atualizarPacienteBanco(rowId, obj);
+  if(ok){
+    $("statusLinha").textContent = "Status: alta ✅";
+    await carregarPacientes();
+  }
+}
+
+async function onDeletar(rowId){
+  if(!confirm("Deletar esse paciente?")) return;
+  stopAlarm(rowId);
+  $("statusLinha").textContent = "Status: deletando...";
+  const ok = await deletarPacienteBanco(rowId);
+  if(ok){
+    $("statusLinha").textContent = "Status: deletado ✅";
+    await carregarPacientes();
+  }
+}
+
+async function onSalvarReav(rowId){
+  const row = pacientes.find(x=>x.id===rowId);
+  if(!row) return;
+
+  const box = $("reavtext-"+rowId);
+  const texto = (box?.value||"").trim();
+  if(!texto){
+    alert("Digite algo na reavaliação.");
+    return;
   }
 
-  document.getElementById("exportTextArea").value = texto;
+  const obj = row.dados_json || {};
+  if(obj.alta){
+    alert("Paciente já está de alta.");
+    return;
+  }
+
+  obj.reavs = Array.isArray(obj.reavs) ? obj.reavs : [];
+  obj.reavs.unshift({
+    at: nowISO(),
+    text: texto
+  });
+
+  // reprograma próxima reav (mesma regra por cor)
+  const mins = intervaloPorCor(obj.cor || "yellow");
+  obj.prox = new Date(Date.now() + mins*60000).toISOString();
+
+  stopAlarm(rowId);
+
+  $("statusLinha").textContent = "Status: salvando reav...";
+  const ok = await atualizarPacienteBanco(rowId, obj);
+  if(ok){
+    $("statusLinha").textContent = "Status: reav salva ✅";
+    await carregarPacientes();
+  }
 }
 
-function fecharExport(){
-  const modal = document.getElementById("exportModal");
-  if(modal) modal.remove();
+/* =========================
+   RENDER LISTA
+========================= */
+function countdownInfo(proxISO){
+  if(!proxISO) return { text:"-", cls:"cd-ok", overdue:false, diff:0 };
+
+  const prox = new Date(proxISO).getTime();
+  const now = Date.now();
+  const diff = prox - now;
+
+  if(diff <= 0){
+    return { text:"ATRASADO", cls:"cd-late", overdue:true, diff };
+  }
+
+  const min = Math.floor(diff/60000);
+  const sec = Math.floor((diff%60000)/1000);
+  const cls = diff < 10*60000 ? "cd-warn" : "cd-ok";
+  return { text:`${min}m ${sec}s`, cls, overdue:false, diff };
 }
 
-/* ========================= */
+function escapeHtml(str){
+  return (str||"").toString()
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
 
 function render(){
+  $("countPacientes").textContent = `(${pacientes.length})`;
 
-  const div = document.getElementById("lista");
-  div.innerHTML="";
+  const div = $("lista");
+  div.innerHTML = "";
 
-  pacientes.forEach(p=>{
+  // ordenação: atrasados (ativos) primeiro, depois por horário prox
+  const arr = [...pacientes].sort((a,b)=>{
+    const ao = !a.alta && a.dados_json?.prox && (new Date(a.dados_json.prox).getTime() <= Date.now());
+    const bo = !b.alta && b.dados_json?.prox && (new Date(b.dados_json.prox).getTime() <= Date.now());
+    if(ao !== bo) return ao ? -1 : 1;
 
-    const obj = p.dados_json;
-    const atrasado = new Date(obj.prox) <= new Date() && !obj.alta;
+    const ap = a.dados_json?.prox ? new Date(a.dados_json.prox).getTime() : Infinity;
+    const bp = b.dados_json?.prox ? new Date(b.dados_json.prox).getTime() : Infinity;
+    return ap - bp;
+  });
 
-    if(atrasado) tocarAlarme();
+  arr.forEach(row=>{
+    const obj = row.dados_json || {};
+    const nome = row.name || obj.nome || "SEM NOME";
+    const hd = row.hd || obj.hd || "-";
+    const proxISO = obj.prox || null;
+
+    const cd = countdownInfo(proxISO);
+    const overdueActive = (!row.alta && cd.overdue);
+
+    // alarme só se atrasado e não alta
+    if(overdueActive) startAlarm(row.id);
+    else stopAlarm(row.id);
 
     const card = document.createElement("div");
-    card.className="card";
-    if(obj.alta) card.classList.add("alta");
+    card.className = "patient";
+    if(overdueActive) card.classList.add("overdue");
+
+    const nameClass = row.alta ? "pname strike" : "pname";
+    const proxStr = proxISO ? hhmm(new Date(proxISO)) : "-";
+
+    // reav history (simples)
+    const reavs = Array.isArray(obj.reavs) ? obj.reavs : [];
+    const lastReav = reavs[0] ? `Última reav: ${hhmm(new Date(reavs[0].at))}` : "Última reav: -";
 
     card.innerHTML = `
-      <b>${obj.nome}</b><br>
-      Próx reav: ${new Date(obj.prox).toLocaleTimeString()}<br><br>
-      <button onclick="exportar('${p.id}')">Exportar</button>
-      <button onclick="darAlta('${p.id}')">ALTA</button>
-      <button class="danger" onclick="deletar('${p.id}')">DELETAR</button>
+      <div class="patient-top">
+        <div>
+          <div class="${nameClass}">${escapeHtml(nome)}</div>
+          <div class="meta">
+            Próx. reav: <b>${proxStr}</b>
+            ${(!row.alta && proxISO) ? ` <span class="cd ${cd.cls}">${cd.text}</span>` : ""}
+            <br>
+            ${escapeHtml(lastReav)}
+            <br>
+            HD: ${escapeHtml(hd)}
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="secondary" data-act="export">Exportar</button>
+          ${row.alta ? "" : `<button class="warn" data-act="reav">Reavaliar</button>`}
+          ${row.alta ? "" : `<button class="success" data-act="alta">Alta</button>`}
+          <button class="danger" data-act="del">Deletar</button>
+        </div>
+      </div>
+
+      <div id="reavbox-${row.id}"></div>
     `;
+
+    // ações
+    card.querySelector('[data-act="export"]').addEventListener("click", ()=>{
+      showExport(exportTexto(obj));
+    });
+
+    const btnReav = card.querySelector('[data-act="reav"]');
+    if(btnReav){
+      btnReav.addEventListener("click", ()=>{
+        const box = $("reavbox-"+row.id);
+        if(!box) return;
+
+        // toggle
+        if(box.innerHTML.trim()){
+          box.innerHTML = "";
+          return;
+        }
+
+        box.innerHTML = `
+          <div class="reavbox">
+            <div class="small" style="margin-bottom:8px;">
+              REAVALIADO ÀS <b>${hhmm(new Date())}</b>
+            </div>
+            <textarea id="reavtext-${row.id}" placeholder="Achados da reavaliação..."></textarea>
+            <div class="row" style="margin-top:10px;">
+              <button class="success" id="btnSaveReav-${row.id}">Salvar reav</button>
+              <button class="secondary" id="btnCloseReav-${row.id}">Fechar</button>
+            </div>
+          </div>
+        `;
+
+        $("btnSaveReav-"+row.id).addEventListener("click", ()=>onSalvarReav(row.id));
+        $("btnCloseReav-"+row.id).addEventListener("click", ()=>{ box.innerHTML=""; });
+      });
+    }
+
+    const btnAlta = card.querySelector('[data-act="alta"]');
+    if(btnAlta){
+      btnAlta.addEventListener("click", ()=>onAlta(row.id));
+    }
+
+    card.querySelector('[data-act="del"]').addEventListener("click", ()=>onDeletar(row.id));
 
     div.appendChild(card);
   });
 }
 
-db.channel("realtime")
-  .on("postgres_changes",
-    { event:"*", schema:"public", table:"pacientes" },
-    ()=> carregar()
-  )
-  .subscribe();
+/* =========================
+   REALTIME
+========================= */
+function initRealtime(){
+  if(realtimeChannel) return;
 
-carregar();
-setInterval(render,10000);
+  realtimeChannel = supabaseClient
+    .channel("realtime-pacientes")
+    .on("postgres_changes",
+      { event:"*", schema:"public", table:"pacientes" },
+      ()=> carregarPacientes()
+    )
+    .subscribe();
+}
 
+/* =========================
+   EVENTS
+========================= */
+$("btnSalvar").addEventListener("click", onSalvar);
+$("btnLimpar").addEventListener("click", clearForm);
+$("btnFecharExport").addEventListener("click", hideExport);
+
+// destaca visualmente labels marcados
+document.addEventListener("change", (e)=>{
+  if(e.target && e.target.matches("#condutaChecklist input[type='checkbox']")){
+    const lab = e.target.closest("label");
+    if(lab) lab.classList.toggle("checked", e.target.checked);
+  }
+});
+
+/* =========================
+   BOOT
+========================= */
+renderCondutaChecklist();
+applyDefaultsIfEmpty();
+initRealtime();
+carregarPacientes();
+
+// countdown/alarme em tempo real
+setInterval(render, 1000);
 </script>
+
 </body>
 </html>
