@@ -1,31 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REAV SMART</title>
+
+<!-- SUPABASE CDN CORRETO -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+  font-family:Arial;
+  background:#f4f6f8;
+  padding:20px;
+}
+.card{
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:15px;
+  box-shadow:0 1px 3px rgba(0,0,0,.1);
+}
+input, textarea{
+  width:100%;
+  margin:6px 0;
+  padding:8px;
+}
+button{
+  padding:8px 12px;
+  margin:4px;
+  cursor:pointer;
+}
+</style>
+
+</head>
+<body>
+
+<h2>REAV SMART</h2>
+
+<div class="card">
+  <input id="qp" placeholder="Queixa principal">
+  <textarea id="hda" placeholder="HDA"></textarea>
+  <textarea id="hd" placeholder="Hipótese diagnóstica"></textarea>
+
+  <select id="cor">
+    <option value="red">🔴 10 min</option>
+    <option value="orange">🟠 30 min</option>
+    <option value="yellow" selected>🟡 60 min</option>
+    <option value="green">🟢 120 min</option>
+  </select>
+
+  <button onclick="addOrUpdatePaciente()">Salvar</button>
+</div>
+
+<div id="lista"></div>
+
 <script>
 
 /* =========================
    SUPABASE CONFIG
 ========================= */
 
-const SUPABASE_URL = "sb_publishable_NeVuFb5qFM0b4hPkmVpbIg_BjF0GZzd";
-const SUPABASE_KEY = "sb_secret_E5tSQmqv_W9tjzdaccvBxQ_QuHXb22V";
+const SUPABASE_URL = "https://qrvlpupxzvqvwcgwwamr.supabase.co";
+const SUPABASE_KEY = "SUA_ANON_PUBLIC_KEY_AQUI"; // use anon public
 
-const supabase = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* =========================
    STATE
 ========================= */
 
 let pacientes = [];
-let editingId = null;
-const alarmTimers = {};
-let blinkInterval = null;
 let realtimeChannel = null;
 
-const $ = (id) => document.getElementById(id);
-
 function nowISO(){ return new Date().toISOString(); }
-function hhmm(d){ return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}); }
+
+/* =========================
+   TIMER
+========================= */
+
+function intervaloPorCor(c){
+  if(c==="red") return 10;
+  if(c==="orange") return 30;
+  if(c==="yellow") return 60;
+  if(c==="green") return 120;
+  return 60;
+}
 
 /* =========================
    DATABASE
@@ -33,7 +94,7 @@ function hhmm(d){ return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-dig
 
 async function carregarPacientes(){
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from("pacientes")
     .select("*")
     .order("created_at",{ascending:false});
@@ -43,15 +104,7 @@ async function carregarPacientes(){
     return;
   }
 
-  pacientes = (data || []).map(p => ({
-    id: p.id,
-    ...p.dados_json,
-    created_at: p.created_at,
-    alta: p.alta,
-    alta_at: p.alta_at,
-    prox: p.dados_json?.prox
-  }));
-
+  pacientes = data || [];
   render();
 }
 
@@ -59,20 +112,17 @@ async function salvarPacienteBanco(p){
 
   if(p.id){
 
-    const { error } = await supabase
+    await supabaseClient
       .from("pacientes")
       .update({
         dados_json: p,
-        alta: p.alta,
-        alta_at: p.alta_at
+        hd: p.hd
       })
       .eq("id",p.id);
 
-    if(error) console.error(error);
-
   }else{
 
-    const { data, error } = await supabase
+    const { data } = await supabaseClient
       .from("pacientes")
       .insert([{
         name: p.nome,
@@ -82,27 +132,13 @@ async function salvarPacienteBanco(p){
       }])
       .select();
 
-    if(error){
-      console.error(error);
-      return;
-    }
-
     p.id = data?.[0]?.id;
   }
 }
 
-async function deletarPacienteBanco(id){
-  await supabase.from("pacientes").delete().eq("id",id);
-}
-
-async function darAltaBanco(id){
-  await supabase
-    .from("pacientes")
-    .update({
-      alta:true,
-      alta_at:nowISO()
-    })
-    .eq("id",id);
+async function removerPaciente(id){
+  await supabaseClient.from("pacientes").delete().eq("id",id);
+  await carregarPacientes();
 }
 
 /* =========================
@@ -111,55 +147,58 @@ async function darAltaBanco(id){
 
 async function addOrUpdatePaciente(){
 
-  const base = readFormToPatientBase();
-
-  if(editingId){
-
-    const p = pacientes.find(x=>x.id===editingId);
-    if(!p) return;
-
-    Object.assign(p,base);
-    p.updated_at = nowISO();
-
-    await salvarPacienteBanco(p);
-
-    editingId=null;
-    updateEditUI();
-    clearFormOnly();
-    await carregarPacientes();
-    return;
-  }
+  const nome = document.getElementById("qp").value.trim() || "SEM QP";
+  const hda = document.getElementById("hda").value.trim();
+  const hd = document.getElementById("hd").value.trim();
+  const cor = document.getElementById("cor").value;
 
   const created = nowISO();
 
   const novo = {
-    ...base,
+    nome,
+    hda,
+    hd,
+    cor,
     created_at:created,
-    historico:[],
-    alertando:false,
-    alta:false,
-    alta_at:null
+    prox: new Date(Date.now() + intervaloPorCor(cor)*60000).toISOString()
   };
 
-  const mins = minutosReav(novo);
-  novo.prox = new Date(Date.now()+mins*60000).toISOString();
-
   await salvarPacienteBanco(novo);
-
-  clearFormOnly();
+  limparForm();
   await carregarPacientes();
 }
 
-async function removePaciente(id){
-  stopAlarm(id);
-  await deletarPacienteBanco(id);
-  await carregarPacientes();
+function limparForm(){
+  document.getElementById("qp").value="";
+  document.getElementById("hda").value="";
+  document.getElementById("hd").value="";
 }
 
-async function darAlta(id){
-  stopAlarm(id);
-  await darAltaBanco(id);
-  await carregarPacientes();
+/* =========================
+   RENDER
+========================= */
+
+function render(){
+
+  const div = document.getElementById("lista");
+  div.innerHTML="";
+
+  pacientes.forEach(p=>{
+
+    const card = document.createElement("div");
+    card.className="card";
+
+    const prox = new Date(p.dados_json?.prox || p.prox);
+
+    card.innerHTML = `
+      <b>${p.name}</b><br>
+      HD: ${p.hd || "-"}<br>
+      Próx reav: ${prox.toLocaleTimeString()}<br>
+      <button onclick="removerPaciente('${p.id}')">Remover</button>
+    `;
+
+    div.appendChild(card);
+  });
 }
 
 /* =========================
@@ -170,7 +209,7 @@ function initRealtime(){
 
   if(realtimeChannel) return;
 
-  realtimeChannel = supabase
+  realtimeChannel = supabaseClient
     .channel("realtime")
     .on("postgres_changes",
       { event:"*", schema:"public", table:"pacientes" },
@@ -185,6 +224,8 @@ function initRealtime(){
 
 initRealtime();
 carregarPacientes();
-setInterval(render,1000);
 
 </script>
+
+</body>
+</html>
