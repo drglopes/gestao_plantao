@@ -16,6 +16,7 @@
   --muted:#94a3b8;
   --btn:#2563eb;
   --danger:#dc2626;
+  --success:#16a34a;
   --border:#334155;
 }
 
@@ -45,33 +46,42 @@ input, textarea, select{
   border-radius:10px;
 }
 
-textarea{
-  min-height:80px;
-}
+textarea{ min-height:80px; }
 
 button{
-  padding:8px 12px;
-  margin:4px 4px 4px 0;
+  padding:10px;
+  margin:5px 5px 5px 0;
   cursor:pointer;
   border:none;
   border-radius:8px;
-  background:var(--btn);
-  color:white;
+  font-weight:600;
 }
 
-button.danger{
-  background:var(--danger);
-}
+button.primary{ background:var(--btn); color:white; }
+button.danger{ background:var(--danger); color:white; }
+button.success{ background:var(--success); color:white; }
 
-.export-box{
+.checklist{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:8px;
   margin-top:10px;
-  height:250px;
+}
+
+.checklist label{
   background:#0f172a;
-  color:#e2e8f0;
   border:1px solid var(--border);
-  border-radius:10px;
-  padding:10px;
-  font-family:monospace;
+  padding:8px;
+  border-radius:8px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.alta{
+  text-decoration:line-through;
+  opacity:.5;
 }
 </style>
 </head>
@@ -81,46 +91,55 @@ button.danger{
 <h2>REAV SMART</h2>
 
 <div class="card">
-  <input id="qp" placeholder="Queixa principal">
-  <textarea id="hda" placeholder="HDA"></textarea>
 
-  <!-- NOVO CAMPO ANTECEDENTES -->
-  <textarea id="ant" placeholder="Antecedentes"></textarea>
+<input id="qp" placeholder="Queixa principal">
+<textarea id="hda" placeholder="HDA"></textarea>
 
-  <!-- NOVO CAMPO SINAIS VITAIS -->
-  <textarea id="sv" placeholder="Sinais vitais"></textarea>
+<textarea id="ant">
+Comorbidades:
+MUC:
+Alergia:
+Cirurgias prévias:
+</textarea>
 
-  <!-- EXAME FÍSICO -->
-  <textarea id="ef">GERAL: BOM ESTADO GERAL, LÚCIDO, ORIENTADO, HIDRATADO, CORADO, AFEBRIL.
+<textarea id="sv">
+FC:  bpm | PA:  mmHg | SatO2:  % | FR:  irpm
+</textarea>
+
+<textarea id="ef">GERAL: BOM ESTADO GERAL, LÚCIDO, ORIENTADO, HIDRATADO, CORADO, AFEBRIL.
 AR: MV PRESENTE BILATERALMENTE, SEM RUÍDOS ADVENTÍCIOS.
 ACV: RCR EM 2T, SEM SOPROS.
 ABD: PLANO, FLÁCIDO, INDOLOR.
 NEURO: SEM DÉFICITS FOCAIS.</textarea>
 
-  <textarea id="hd" placeholder="Hipótese diagnóstica"></textarea>
+<textarea id="hd" placeholder="Hipótese diagnóstica"></textarea>
 
-  <!-- NOVO CAMPO CONDUTA -->
-  <textarea id="conduta" placeholder="Conduta"></textarea>
+<h4>Conduta</h4>
+<div class="checklist">
+<label><input type="checkbox" value="1"> Sintomáticos</label>
+<label><input type="checkbox" value="2"> Exames laboratoriais</label>
+<label><input type="checkbox" value="3"> Exames de imagem</label>
+<label><input type="checkbox" value="4"> Reavaliação</label>
+<label><input type="checkbox" value="5"> Internação</label>
+<label><input type="checkbox" value="6"> Alta após atendimento</label>
+<label><input type="checkbox" value="7"> Prescrição domiciliar</label>
+<label><input type="checkbox" value="8"> Encaminhamento</label>
+</div>
 
-  <select id="cor">
-    <option value="red">🔴 10 min</option>
-    <option value="orange">🟠 30 min</option>
-    <option value="yellow" selected>🟡 60 min</option>
-    <option value="green">🟢 120 min</option>
-  </select>
+<select id="cor">
+<option value="red">🔴 10 min</option>
+<option value="orange">🟠 30 min</option>
+<option value="yellow" selected>🟡 60 min</option>
+<option value="green">🟢 120 min</option>
+</select>
 
-  <button onclick="addPaciente()">Salvar</button>
+<button class="primary" onclick="addPaciente()">Salvar</button>
+
 </div>
 
 <div id="lista"></div>
 
-<textarea id="exportBox" class="export-box" style="display:none;"></textarea>
-
 <script>
-
-/* =========================
-   SUPABASE CONFIG
-========================= */
 
 const SUPABASE_URL = "https://qrvlpupxzvqvwcgwwamr.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFydmxwdXB4enZxdndjZ3d3YW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzNTE1NjUsImV4cCI6MjA4NzkyNzU2NX0.1k1P_IviJLaHvBK79jpUvm1uTrcLY01umYJsGerLq2Y";
@@ -128,13 +147,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-/* =========================
-   STATE
-========================= */
-
 let pacientes = [];
-
-function nowISO(){ return new Date().toISOString(); }
 
 function intervaloPorCor(c){
   if(c==="red") return 10;
@@ -144,104 +157,50 @@ function intervaloPorCor(c){
   return 60;
 }
 
-/* =========================
-   DATABASE
-========================= */
-
 async function carregar(){
-  const { data } = await db
-    .from("pacientes")
-    .select("*")
-    .order("created_at",{ascending:false});
-
+  const { data } = await db.from("pacientes").select("*").order("created_at",{ascending:false});
   pacientes = data || [];
   render();
 }
 
 async function salvar(p){
   if(p.id){
-    await db.from("pacientes")
-      .update({ dados_json:p })
-      .eq("id",p.id);
+    await db.from("pacientes").update({ dados_json:p }).eq("id",p.id);
   } else {
-    const { data } = await db.from("pacientes")
-      .insert([{ dados_json:p }])
-      .select();
+    const { data } = await db.from("pacientes").insert([{ dados_json:p }]).select();
     p.id = data[0].id;
   }
 }
 
-/* =========================
-   CRUD
-========================= */
-
 async function addPaciente(){
 
+  const condutaSelecionada = [...document.querySelectorAll(".checklist input:checked")]
+    .map(c=>parseInt(c.value))
+    .sort((a,b)=>a-b);
+
   const novo = {
-    nome: document.getElementById("qp").value.trim() || "SEM QP",
-    qp: document.getElementById("qp").value.trim(),
-    hda: document.getElementById("hda").value.trim(),
-    antecedentes: document.getElementById("ant").value.trim(),
-    sv: document.getElementById("sv").value.trim(),
-    ef: document.getElementById("ef").value.trim(),
-    hd: document.getElementById("hd").value.trim(),
-    conduta: document.getElementById("conduta").value.trim(),
-    cor: document.getElementById("cor").value,
-    created_at: nowISO(),
-    prox: new Date(Date.now() + intervaloPorCor(document.getElementById("cor").value)*60000).toISOString()
+    nome: qp.value || "SEM QP",
+    qp: qp.value,
+    hda: hda.value,
+    antecedentes: ant.value,
+    sv: sv.value,
+    ef: ef.value,
+    hd: hd.value,
+    conduta: condutaSelecionada,
+    cor: cor.value,
+    created_at: new Date().toISOString(),
+    prox: new Date(Date.now()+intervaloPorCor(cor.value)*60000).toISOString(),
+    alta:false
   };
 
   await salvar(novo);
-  limparForm();
-  await carregar();
+  limpar();
+  carregar();
 }
 
-async function remover(id){
-  await db.from("pacientes").delete().eq("id",id);
-  await carregar();
+function limpar(){
+  document.querySelectorAll(".checklist input").forEach(c=>c.checked=false);
 }
-
-/* =========================
-   EXPORT PADRÃO
-========================= */
-
-function exportarPaciente(obj){
-
-  const texto = `#ANAMNESE
-QUEIXA PRINCIPAL: ${obj.qp}
-
-HDA:
-${obj.hda}
-
----
-#ANTECEDENTES
-${obj.antecedentes || "-"}
-
----
-#SINAIS VITAIS
-${obj.sv || "-"}
-
----
-#EXAME FÍSICO
-${obj.ef}
-
----
-#HIPÓTESE DIAGNÓSTICA
-${obj.hd}
-
----
-#CONDUTA
-${obj.conduta || "-"}`;
-
-  const box = document.getElementById("exportBox");
-  box.style.display="block";
-  box.value = texto;
-  box.select();
-}
-
-/* =========================
-   RENDER
-========================= */
 
 function render(){
 
@@ -250,35 +209,76 @@ function render(){
 
   pacientes.forEach(p=>{
 
-    const obj = p.dados_json || p;
+    const obj = p.dados_json;
+
+    const atrasado = new Date(obj.prox) <= new Date() && !obj.alta;
+
+    if(atrasado) tocarAlarme();
 
     const card = document.createElement("div");
     card.className="card";
+    if(obj.alta) card.classList.add("alta");
 
     card.innerHTML = `
       <b>${obj.nome}</b><br>
-      HD: ${obj.hd || "-"}<br>
       Próx reav: ${new Date(obj.prox).toLocaleTimeString()}<br>
-      <button onclick='exportarPaciente(${JSON.stringify(obj)})'>Exportar</button>
-      <button class="danger" onclick="remover('${p.id}')">Remover</button>
+      <button class="success" onclick="exportar(${p.id})">Exportar</button>
+      <button class="danger" onclick="darAlta('${p.id}')">ALTA</button>
     `;
 
     div.appendChild(card);
   });
 }
 
-function limparForm(){
-  document.getElementById("qp").value="";
-  document.getElementById("hda").value="";
-  document.getElementById("ant").value="";
-  document.getElementById("sv").value="";
-  document.getElementById("hd").value="";
-  document.getElementById("conduta").value="";
+async function darAlta(id){
+  const p = pacientes.find(x=>x.id===id);
+  if(!p) return;
+  p.dados_json.alta=true;
+  await salvar(p.dados_json);
+  carregar();
 }
 
-/* =========================
-   REALTIME
-========================= */
+function tocarAlarme(){
+  const audio = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+  audio.play();
+}
+
+function exportar(id){
+  const p = pacientes.find(x=>x.id===id);
+  const o = p.dados_json;
+
+  const condutaTexto = (o.conduta||[]).join(", ");
+
+  const texto = `#ANAMNESE
+QP: ${o.qp}
+
+HDA:
+${o.hda}
+
+---
+#ANTECEDENTES
+${o.antecedentes}
+
+---
+#SINAIS VITAIS
+${o.sv}
+
+---
+#EXAME FÍSICO
+${o.ef}
+
+---
+#HIPÓTESE DIAGNÓSTICA
+${o.hd}
+
+---
+#CONDUTA
+${condutaTexto}
+`;
+
+  navigator.clipboard.writeText(texto);
+  alert("Copiado para área de transferência.");
+}
 
 db.channel("realtime")
   .on("postgres_changes",
@@ -287,9 +287,7 @@ db.channel("realtime")
   )
   .subscribe();
 
-/* =========================
-   INIT
-========================= */
+setInterval(render,10000);
 
 carregar();
 
