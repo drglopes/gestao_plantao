@@ -5,80 +5,117 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>REAV SMART</title>
 
-<!-- SUPABASE CDN CORRETO -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <style>
+:root{
+  --bg:#0f172a;
+  --card:#1e293b;
+  --text:#e2e8f0;
+  --muted:#94a3b8;
+  --btn:#2563eb;
+  --btn2:#475569;
+  --danger:#dc2626;
+  --success:#16a34a;
+  --border:#334155;
+}
 body{
-  font-family:Arial;
-  background:#f4f6f8;
-  padding:20px;
+  margin:0;
+  padding:16px;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',sans-serif;
 }
 .card{
-  background:white;
-  padding:15px;
-  border-radius:10px;
-  margin-bottom:15px;
-  box-shadow:0 1px 3px rgba(0,0,0,.1);
+  background:var(--card);
+  padding:14px;
+  border-radius:12px;
+  margin-bottom:12px;
+  border:1px solid var(--border);
 }
-input, textarea{
+input,textarea,select{
   width:100%;
+  background:#0f172a;
+  color:var(--text);
+  border:1px solid var(--border);
+  padding:10px;
+  border-radius:10px;
   margin:6px 0;
-  padding:8px;
 }
 button{
+  background:var(--btn);
+  color:white;
+  border:none;
   padding:8px 12px;
-  margin:4px;
+  border-radius:10px;
   cursor:pointer;
+  margin:4px 4px 4px 0;
+}
+.secondary{background:var(--btn2);}
+.danger{background:var(--danger);}
+.success{background:var(--success);}
+.patient{
+  background:var(--card);
+  padding:12px;
+  border-radius:12px;
+  margin-bottom:10px;
+  border:1px solid var(--border);
+}
+.overdue{
+  border:1px solid #ef4444;
+  animation:pulse 1s infinite;
+}
+@keyframes pulse{
+  0%{background:#1e293b;}
+  50%{background:#3f1d1d;}
+  100%{background:#1e293b;}
+}
+.history{
+  margin-top:8px;
+  font-size:12px;
+  color:var(--muted);
+  white-space:pre-wrap;
 }
 </style>
-
 </head>
 <body>
 
 <h2>REAV SMART</h2>
 
 <div class="card">
-  <input id="qp" placeholder="Queixa principal">
-  <textarea id="hda" placeholder="HDA"></textarea>
-  <textarea id="hd" placeholder="Hipótese diagnóstica"></textarea>
+<input id="qp" placeholder="Queixa principal">
+<textarea id="hda" placeholder="HDA"></textarea>
+<textarea id="hd" placeholder="Hipótese diagnóstica"></textarea>
 
-  <select id="cor">
-    <option value="red">🔴 10 min</option>
-    <option value="orange">🟠 30 min</option>
-    <option value="yellow" selected>🟡 60 min</option>
-    <option value="green">🟢 120 min</option>
-  </select>
+<select id="cor">
+<option value="red">🔴 10 min</option>
+<option value="orange">🟠 30 min</option>
+<option value="yellow" selected>🟡 60 min</option>
+<option value="green">🟢 120 min</option>
+</select>
 
-  <button onclick="addOrUpdatePaciente()">Salvar</button>
+<button onclick="addPaciente()">Adicionar</button>
 </div>
 
 <div id="lista"></div>
 
 <script>
 
-/* =========================
-   SUPABASE CONFIG
-========================= */
+/* ================= SUPABASE ================= */
 
-const SUPABASE_URL = "https://qrvlpupxzvqvwcgwwamr.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFydmxwdXB4enZxdndjZ3d3YW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzNTE1NjUsImV4cCI6MjA4NzkyNzU2NX0.1k1P_IviJLaHvBK79jpUvm1uTrcLY01umYJsGerLq2Y"; // use anon public
+const SUPABASE_URL = "COLE_SUA_URL_AQUI";
+const SUPABASE_ANON_KEY = "COLE_SUA_ANON_KEY_AQUI";
 
 const { createClient } = supabase;
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* =========================
-   STATE
-========================= */
+/* ================= STATE ================= */
 
 let pacientes = [];
-let realtimeChannel = null;
+const alarmTimers = {};
 
-function nowISO(){ return new Date().toISOString(); }
-
-/* =========================
-   TIMER
-========================= */
+/* ================= UTIL ================= */
 
 function intervaloPorCor(c){
   if(c==="red") return 10;
@@ -88,85 +125,129 @@ function intervaloPorCor(c){
   return 60;
 }
 
-/* =========================
-   DATABASE
-========================= */
+function nowISO(){ return new Date().toISOString(); }
 
-async function carregarPacientes(){
+function countdown(p){
+  const diff = new Date(p.prox).getTime() - Date.now();
+  if(diff <= 0) return "ATRASADO";
+  const m = Math.floor(diff/60000);
+  const s = Math.floor((diff%60000)/1000);
+  return `${m}m ${s}s`;
+}
 
-  const { data, error } = await supabaseClient
+/* ================= DATABASE ================= */
+
+async function carregar(){
+  const { data } = await db
     .from("pacientes")
     .select("*")
     .order("created_at",{ascending:false});
-
-  if(error){
-    console.error(error);
-    return;
-  }
 
   pacientes = data || [];
   render();
 }
 
-async function salvarPacienteBanco(p){
-
+async function salvar(p){
   if(p.id){
-
-    await supabaseClient
-      .from("pacientes")
-      .update({
-        dados_json: p,
-        hd: p.hd
-      })
+    await db.from("pacientes")
+      .update({ dados_json:p })
       .eq("id",p.id);
-
-  }else{
-
-    const { data } = await supabaseClient
-      .from("pacientes")
-      .insert([{
-        name: p.nome,
-        hd: p.hd,
-        dados_json: p,
-        alta:false
-      }])
+  } else {
+    const { data } = await db.from("pacientes")
+      .insert([{ dados_json:p }])
       .select();
-
-    p.id = data?.[0]?.id;
+    p.id = data[0].id;
   }
 }
 
-async function removerPaciente(id){
-  await supabaseClient.from("pacientes").delete().eq("id",id);
-  await carregarPacientes();
-}
+/* ================= CRUD ================= */
 
-/* =========================
-   CRUD
-========================= */
-
-async function addOrUpdatePaciente(){
-
-  const nome = document.getElementById("qp").value.trim() || "SEM QP";
+async function addPaciente(){
+  const qp = document.getElementById("qp").value.trim() || "SEM QP";
   const hda = document.getElementById("hda").value.trim();
   const hd = document.getElementById("hd").value.trim();
   const cor = document.getElementById("cor").value;
 
-  const created = nowISO();
-
   const novo = {
-    nome,
-    hda,
-    hd,
-    cor,
-    created_at:created,
+    nome: qp,
+    qp, hda, hd, cor,
+    created_at: nowISO(),
+    historico: [],
+    alta:false,
     prox: new Date(Date.now() + intervaloPorCor(cor)*60000).toISOString()
   };
 
-  await salvarPacienteBanco(novo);
+  await salvar(novo);
   limparForm();
-  await carregarPacientes();
+  await carregar();
 }
+
+async function remover(id){
+  clearInterval(alarmTimers[id]);
+  await db.from("pacientes").delete().eq("id",id);
+  await carregar();
+}
+
+async function darAlta(id){
+  await db.from("pacientes")
+    .update({ alta:true })
+    .eq("id",id);
+  await carregar();
+}
+
+/* ================= RENDER ================= */
+
+function render(){
+  const div = document.getElementById("lista");
+  div.innerHTML="";
+
+  pacientes.forEach(p=>{
+
+    const obj = p.dados_json || p;
+    const atrasado = !obj.alta && new Date(obj.prox).getTime() <= Date.now();
+
+    const card = document.createElement("div");
+    card.className = "patient";
+    if(atrasado) card.classList.add("overdue");
+
+    card.innerHTML = `
+      <b>${obj.nome}</b><br>
+      HD: ${obj.hd || "-"}<br>
+      Próx reav: ${new Date(obj.prox).toLocaleTimeString()}<br>
+      Status: ${obj.alta ? "ALTA" : countdown(obj)}<br>
+      <button class="success" onclick="darAlta('${p.id}')">Alta</button>
+      <button class="danger" onclick="remover('${p.id}')">Remover</button>
+      <div class="history">${(obj.historico||[]).join("\n")}</div>
+    `;
+
+    div.appendChild(card);
+
+    if(atrasado && !alarmTimers[p.id]){
+      alarmTimers[p.id] = setInterval(()=>{
+        new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg").play();
+      },15000);
+    }
+
+    if(!atrasado && alarmTimers[p.id]){
+      clearInterval(alarmTimers[p.id]);
+      delete alarmTimers[p.id];
+    }
+  });
+}
+
+/* ================= REALTIME ================= */
+
+db.channel("realtime")
+  .on("postgres_changes",
+    { event:"*", schema:"public", table:"pacientes" },
+    ()=> carregar()
+  )
+  .subscribe();
+
+/* ================= INIT ================= */
+
+carregar();
+setInterval(render,1000);
 
 function limparForm(){
   document.getElementById("qp").value="";
@@ -174,58 +255,6 @@ function limparForm(){
   document.getElementById("hd").value="";
 }
 
-/* =========================
-   RENDER
-========================= */
-
-function render(){
-
-  const div = document.getElementById("lista");
-  div.innerHTML="";
-
-  pacientes.forEach(p=>{
-
-    const card = document.createElement("div");
-    card.className="card";
-
-    const prox = new Date(p.dados_json?.prox || p.prox);
-
-    card.innerHTML = `
-      <b>${p.name}</b><br>
-      HD: ${p.hd || "-"}<br>
-      Próx reav: ${prox.toLocaleTimeString()}<br>
-      <button onclick="removerPaciente('${p.id}')">Remover</button>
-    `;
-
-    div.appendChild(card);
-  });
-}
-
-/* =========================
-   REALTIME
-========================= */
-
-function initRealtime(){
-
-  if(realtimeChannel) return;
-
-  realtimeChannel = supabaseClient
-    .channel("realtime")
-    .on("postgres_changes",
-      { event:"*", schema:"public", table:"pacientes" },
-      ()=> carregarPacientes()
-    )
-    .subscribe();
-}
-
-/* =========================
-   BOOT
-========================= */
-
-initRealtime();
-carregarPacientes();
-
 </script>
-
 </body>
 </html>
