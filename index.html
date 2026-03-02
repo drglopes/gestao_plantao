@@ -6,7 +6,6 @@
 <title>REAV SMART</title>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
 <style>
@@ -85,7 +84,13 @@ button.danger{
   <input id="qp" placeholder="Queixa principal">
   <textarea id="hda" placeholder="HDA"></textarea>
 
-  <!-- NOVO CAMPO EXAME FÍSICO -->
+  <!-- NOVO CAMPO ANTECEDENTES -->
+  <textarea id="ant" placeholder="Antecedentes"></textarea>
+
+  <!-- NOVO CAMPO SINAIS VITAIS -->
+  <textarea id="sv" placeholder="Sinais vitais"></textarea>
+
+  <!-- EXAME FÍSICO -->
   <textarea id="ef">GERAL: BOM ESTADO GERAL, LÚCIDO, ORIENTADO, HIDRATADO, CORADO, AFEBRIL.
 AR: MV PRESENTE BILATERALMENTE, SEM RUÍDOS ADVENTÍCIOS.
 ACV: RCR EM 2T, SEM SOPROS.
@@ -94,6 +99,9 @@ NEURO: SEM DÉFICITS FOCAIS.</textarea>
 
   <textarea id="hd" placeholder="Hipótese diagnóstica"></textarea>
 
+  <!-- NOVO CAMPO CONDUTA -->
+  <textarea id="conduta" placeholder="Conduta"></textarea>
+
   <select id="cor">
     <option value="red">🔴 10 min</option>
     <option value="orange">🟠 30 min</option>
@@ -101,8 +109,7 @@ NEURO: SEM DÉFICITS FOCAIS.</textarea>
     <option value="green">🟢 120 min</option>
   </select>
 
-  <button onclick="addOrUpdatePaciente()">Salvar</button>
-  <button onclick="exportarFormulario()">Exportar Texto</button>
+  <button onclick="addPaciente()">Salvar</button>
 </div>
 
 <div id="lista"></div>
@@ -119,14 +126,13 @@ const SUPABASE_URL = "https://qrvlpupxzvqvwcgwwamr.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFydmxwdXB4enZxdndjZ3d3YW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzNTE1NjUsImV4cCI6MjA4NzkyNzU2NX0.1k1P_IviJLaHvBK79jpUvm1uTrcLY01umYJsGerLq2Y";
 
 const { createClient } = supabase;
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* =========================
    STATE
 ========================= */
 
 let pacientes = [];
-let realtimeChannel = null;
 
 function nowISO(){ return new Date().toISOString(); }
 
@@ -142,9 +148,8 @@ function intervaloPorCor(c){
    DATABASE
 ========================= */
 
-async function carregarPacientes(){
-
-  const { data } = await supabaseClient
+async function carregar(){
+  const { data } = await db
     .from("pacientes")
     .select("*")
     .order("created_at",{ascending:false});
@@ -153,23 +158,16 @@ async function carregarPacientes(){
   render();
 }
 
-async function salvarPacienteBanco(p){
-
+async function salvar(p){
   if(p.id){
-
-    await supabaseClient
-      .from("pacientes")
-      .update({ dados_json: p })
+    await db.from("pacientes")
+      .update({ dados_json:p })
       .eq("id",p.id);
-
-  }else{
-
-    const { data } = await supabaseClient
-      .from("pacientes")
-      .insert([{ dados_json: p }])
+  } else {
+    const { data } = await db.from("pacientes")
+      .insert([{ dados_json:p }])
       .select();
-
-    p.id = data?.[0]?.id;
+    p.id = data[0].id;
   }
 }
 
@@ -177,61 +175,63 @@ async function salvarPacienteBanco(p){
    CRUD
 ========================= */
 
-async function addOrUpdatePaciente(){
-
-  const nome = document.getElementById("qp").value.trim() || "SEM QP";
-  const hda = document.getElementById("hda").value.trim();
-  const ef = document.getElementById("ef").value.trim();
-  const hd = document.getElementById("hd").value.trim();
-  const cor = document.getElementById("cor").value;
+async function addPaciente(){
 
   const novo = {
-    nome,
-    qp:nome,
-    hda,
-    ef,
-    hd,
-    cor,
+    nome: document.getElementById("qp").value.trim() || "SEM QP",
+    qp: document.getElementById("qp").value.trim(),
+    hda: document.getElementById("hda").value.trim(),
+    antecedentes: document.getElementById("ant").value.trim(),
+    sv: document.getElementById("sv").value.trim(),
+    ef: document.getElementById("ef").value.trim(),
+    hd: document.getElementById("hd").value.trim(),
+    conduta: document.getElementById("conduta").value.trim(),
+    cor: document.getElementById("cor").value,
     created_at: nowISO(),
-    prox: new Date(Date.now() + intervaloPorCor(cor)*60000).toISOString()
+    prox: new Date(Date.now() + intervaloPorCor(document.getElementById("cor").value)*60000).toISOString()
   };
 
-  await salvarPacienteBanco(novo);
+  await salvar(novo);
   limparForm();
-  await carregarPacientes();
+  await carregar();
 }
 
-function limparForm(){
-  document.getElementById("qp").value="";
-  document.getElementById("hda").value="";
-  document.getElementById("hd").value="";
+async function remover(id){
+  await db.from("pacientes").delete().eq("id",id);
+  await carregar();
 }
 
 /* =========================
    EXPORT PADRÃO
 ========================= */
 
-function exportarFormulario(){
-
-  const qp = document.getElementById("qp").value.trim();
-  const hda = document.getElementById("hda").value.trim();
-  const ef = document.getElementById("ef").value.trim();
-  const hd = document.getElementById("hd").value.trim();
+function exportarPaciente(obj){
 
   const texto = `#ANAMNESE
-QUEIXA PRINCIPAL: ${qp}
+QUEIXA PRINCIPAL: ${obj.qp}
 
 HDA:
-${hda}
+${obj.hda}
+
+---
+#ANTECEDENTES
+${obj.antecedentes || "-"}
+
+---
+#SINAIS VITAIS
+${obj.sv || "-"}
 
 ---
 #EXAME FÍSICO
-${ef}
+${obj.ef}
 
 ---
 #HIPÓTESE DIAGNÓSTICA
-${hd}
-`;
+${obj.hd}
+
+---
+#CONDUTA
+${obj.conduta || "-"}`;
 
   const box = document.getElementById("exportBox");
   box.style.display="block";
@@ -251,7 +251,6 @@ function render(){
   pacientes.forEach(p=>{
 
     const obj = p.dados_json || p;
-    const prox = new Date(obj.prox);
 
     const card = document.createElement("div");
     card.className="card";
@@ -259,42 +258,40 @@ function render(){
     card.innerHTML = `
       <b>${obj.nome}</b><br>
       HD: ${obj.hd || "-"}<br>
-      Próx reav: ${prox.toLocaleTimeString()}<br>
-      <button class="danger" onclick="removerPaciente('${p.id}')">Remover</button>
+      Próx reav: ${new Date(obj.prox).toLocaleTimeString()}<br>
+      <button onclick='exportarPaciente(${JSON.stringify(obj)})'>Exportar</button>
+      <button class="danger" onclick="remover('${p.id}')">Remover</button>
     `;
 
     div.appendChild(card);
   });
 }
 
-async function removerPaciente(id){
-  await supabaseClient.from("pacientes").delete().eq("id",id);
-  await carregarPacientes();
+function limparForm(){
+  document.getElementById("qp").value="";
+  document.getElementById("hda").value="";
+  document.getElementById("ant").value="";
+  document.getElementById("sv").value="";
+  document.getElementById("hd").value="";
+  document.getElementById("conduta").value="";
 }
 
 /* =========================
    REALTIME
 ========================= */
 
-function initRealtime(){
-
-  if(realtimeChannel) return;
-
-  realtimeChannel = supabaseClient
-    .channel("realtime")
-    .on("postgres_changes",
-      { event:"*", schema:"public", table:"pacientes" },
-      ()=> carregarPacientes()
-    )
-    .subscribe();
-}
+db.channel("realtime")
+  .on("postgres_changes",
+    { event:"*", schema:"public", table:"pacientes" },
+    ()=> carregar()
+  )
+  .subscribe();
 
 /* =========================
-   BOOT
+   INIT
 ========================= */
 
-initRealtime();
-carregarPacientes();
+carregar();
 
 </script>
 
